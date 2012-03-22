@@ -7,8 +7,6 @@
 	{ "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "eol", "extend": false} },
 	{ "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "bol", "extend": false} },
 	{ "keys": ["ctrl+d"], "command": "right_delete" },
-	{ "keys": ["ctrl+v"], "command": "move", "args": {"by": "pages", "forward": true} },
-	{ "keys": ["alt+v"], "command": "move", "args": {"by": "pages", "forward": false} },
 
 	{ "keys": ["ctrl+shift+n"], "command": "next_view" },
 	{ "keys": ["ctrl+shift+p"], "command": "prev_view" },
@@ -19,9 +17,6 @@
 	// Undo/Redo/Copy/Paste/Etc Keys
 	{ "keys": ["ctrl+/"], "command": "undo" },
 	{ "keys": ["ctrl+shift+/"], "command": "redo" },
-	{ "keys": ["ctrl+w"], "command": "cut" },
-	{ "keys": ["alt+w"], "command": "copy" },
-	{ "keys": ["ctrl+y"], "command": "paste" },
 
 	// Save/Load/Etc Keys
 	{ "keys": ["ctrl+x", "ctrl+s"], "command": "save" },

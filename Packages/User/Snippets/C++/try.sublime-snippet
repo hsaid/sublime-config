@@ -1,0 +1,14 @@
+<snippet>
+	<content><![CDATA[
+try
+{
+    $0
+}
+catch (${1:zt::exception& e})
+{
+	zwarn << __FUNCTION__ << "() -- " << e.what() << endl;
+}
+]]></content>
+	<tabTrigger>try</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

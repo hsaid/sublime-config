@@ -1,0 +1,4 @@
+{
+	"cmd": ["C:/msys/bin/bash.exe --login -c 'leds -b'"],
+	"shell": true
+}

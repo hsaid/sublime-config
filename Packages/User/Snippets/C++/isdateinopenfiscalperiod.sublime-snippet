@@ -1,0 +1,7 @@
+<snippet>
+	<content><![CDATA[
+Core::intercom()->callIsDateInOpenFinancialFiscalPeriod(&${1:is_open});
+]]></content>
+	<tabTrigger>isdateinopenfiscalperiod</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

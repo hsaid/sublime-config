@@ -1,0 +1,25 @@
+<snippet>
+	<content><![CDATA[
+//==============================================================================
+void $1::setFocus()
+{
+	bool next = true;
+	if (${2:_tabber}.setFocus_focusNextWidget(focusData(), &next)) return;
+
+	${3:ZScreen}::setFocus();
+	$3::focusNextPrevChild(next);
+}
+
+//==============================================================================
+bool $1::focusNextPrevChild(bool next)
+{
+	if ($2.focusNextPrevChild_focusNextWidget(next)) return true;
+
+	// Couldn't find a widget to focus. Move on...
+	$3::setFocus();
+	return $3::focusNextPrevChild(next);
+}
+]]></content>
+	<tabTrigger>setfocus</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

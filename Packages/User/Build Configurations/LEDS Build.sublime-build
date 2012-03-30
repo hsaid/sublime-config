@@ -1,4 +1,5 @@
 {
 	"cmd": ["C:/msys/bin/bash.exe --login -c 'leds -b'"],
+	"file_regex": "(.*)\(([0-9]+)\)",
 	"shell": true
 }

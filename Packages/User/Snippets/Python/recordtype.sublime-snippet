@@ -6,13 +6,16 @@ class $1(object):
 	# ------------------------------------------------------------------------------
 	def __init__(self):
 		$0
+		self.active = None
+		self.owner_agenciesid = None
+		self.$2id = None
 
 	# ------------------------------------------------------------------------------
-	def load(self, $1id):
+	def load(self, $2id):
 		columns = self.__dict__.keys()
 		self.__dict__.update(dict(db.queryOneRec(
 					"SELECT %s "
-					"FROM ${2:Table} "
+					"FROM ${2:financial_} "
 					"WHERE $2id = :$2id;" % ",".join(columns))))
 
 	# ------------------------------------------------------------------------------
@@ -24,7 +27,7 @@ class $1(object):
 		return self.__dict__
 
 	# ------------------------------------------------------------------------------
-	def from_map(self):
+	def from_map(self, values):
 		self.__dict__.update(values)
 ]]></content>
 	<tabTrigger>recordtype</tabTrigger>

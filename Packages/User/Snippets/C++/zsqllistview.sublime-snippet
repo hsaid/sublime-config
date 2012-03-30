@@ -1,0 +1,12 @@
+<snippet>
+	<content><![CDATA[
+${1:lsvItems}->addColumn("${2:column_header}", "${3:column_sort}");$0
+$1->header()->setMovingEnabled(false);
+$1->setResizeMode(QListView::LastColumn);
+$1->setShowMoreLink(lblShowMore);
+$1->setShowAllLink(lblShowAll);
+$1->setLimitDisplayLabel(lblLimited);
+]]></content>
+	<tabTrigger>zsqllistview</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

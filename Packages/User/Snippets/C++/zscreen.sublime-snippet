@@ -1,27 +1,27 @@
 <snippet>
 	<content><![CDATA[
-#ifndef ${1:$(upcase text)}_H
-#define ${1:$(upcase text)}_H
+#ifndef ${1}_H
+#define ${1}_H
 
-#include "${1:$(downcase text)}_ui.h"
+#include "${2}_ui.h"
 
-class ${1:ScreenName} : public $1_scr
+class ${3:ScreenName} : public $3_scr
 {
 	Q_OBJECT
 
 public:
-    $1(QWidget* parent = 0, const char* name = "$1", WFlags f = 0);
-    virtual ~$1();
+    $3(QWidget* parent = 0, const char* name = "$3", WFlags f = 0);
+    virtual ~$3();
 
-	virtual ZScreen* emptyScreen() { return new $1(); }
-	virtual QString screenKey(const QString& id = "") { return $1_scr::screenKey(id); }
+	virtual ZScreen* emptyScreen() { return new $3(); }
+	virtual QString screenKey(const QString& id = "") { return $3_scr::screenKey(id); }
 	virtual void fillMenuPane(ZTaskPane* menuPane);
 
 public slots:
 	virtual void setCaption(const QString& caption = "");
 	
 protected:
-	virtual void open(const QString& $2id);
+	virtual void open(const QString& $4id);
 	virtual void save();
 	virtual void requery();
 	virtual void print();
@@ -32,15 +32,15 @@ private:
 };
 
 #endif
-$0#include "${1:$(downcase text)}.h"
+$0#include "${2}.h"
 
 #include "core.h"
 #include "initializer.h"
 
 //==============================================================================
-$1::$1(QWidget* parent, const char* name, WFlags f)
-	: $1_scr(parent, name, f),
-	  _model("${2:table}")
+$3::$3(QWidget* parent, const char* name, WFlags f)
+	: $3_scr(parent, name, f),
+	  _model("${4:table}")
 {
 	// _model.addField("foo", lneFoo);
 	
@@ -52,18 +52,18 @@ $1::$1(QWidget* parent, const char* name, WFlags f)
 }
 
 //==============================================================================
-$1::~$1()
+$3::~$3()
 {}
 
 //==============================================================================
-void $1::fillMenuPane(ZTaskPane* menuPane)
+void $3::fillMenuPane(ZTaskPane* menuPane)
 {
 	menuPane->addCategory("Menu");
 	//menuPane->addItem("<a href=\"foo\">Foo</a>");
 }
 
 //==============================================================================
-void $1::handleLink(const QString& link)
+void $3::handleLink(const QString& link)
 {
 	QStringList args = QStringList::split("\t", link);
 	args << "" << "";
@@ -76,46 +76,46 @@ void $1::handleLink(const QString& link)
 }
 
 //==============================================================================
-void $1::open(const QString& $2id)
+void $3::open(const QString& $4id)
 {
-	_model.setRecord(zsql::checkInt($2id));
+	_model.setRecord(zsql::checkInt($4id));
 	setCaption();
 }
 
 //==============================================================================
-void $1::save()
+void $3::save()
 {
 	_model.save();
 	setCaption();
 }
 
 //==============================================================================
-void $1::requery()
+void $3::requery()
 {
 	
 }
 
 //==============================================================================
-void $1::print()
+void $3::print()
 {
 	ZReportParams p;
-	p["$2id"] = zsql::checkInt(_model.getRecord());
+	p["$4id"] = zsql::checkInt(_model.getRecord());
 	Core::intercom()->callOpenReport("module", "reportname", p);
 }
 
 //==============================================================================
-void $1::setCaption(const QString& /*caption*/)
+void $3::setCaption(const QString& /*caption*/)
 {
 	QString caption;
 	if (zsql::isInt(_model.getRecord()))
 	{
-		caption = "${3:Caption} - " + /* main text widget */;
+		caption = "${5:Caption} - " + /* main text widget */;
 	}
 	else
 	{
-		caption = "New $3";
+		caption = "New $5";
 	}
-	$1_scr::setCaption(caption);
+	$3_scr::setCaption(caption);
 }
 
 ]]></content>

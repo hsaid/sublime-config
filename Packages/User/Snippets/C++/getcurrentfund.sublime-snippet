@@ -1,7 +1,6 @@
 <snippet>
 	<content><![CDATA[
-QString fund_name, fund_id;
-Core::intercom()->callGetFinancialCurrentFund(&fund_name, &fund_id);
+Core::intercom()->callGetFinancialCurrentFund(&_current_financial_fund_name, &_current_financial_fund_id);
 ]]></content>
 	<tabTrigger>getcurrentfund</tabTrigger>
 	<scope>source.c++</scope>

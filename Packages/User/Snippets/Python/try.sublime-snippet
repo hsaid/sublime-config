@@ -1,0 +1,12 @@
+<snippet>
+	<content><![CDATA[
+try:
+	${0}
+except Exception, e:
+	print zutil.get_stack_string()
+	print e
+	raise
+]]></content>
+	<tabTrigger>try</tabTrigger>
+	<scope>source.python</scope>
+</snippet>

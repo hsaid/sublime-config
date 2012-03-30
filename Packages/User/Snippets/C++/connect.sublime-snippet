@@ -1,0 +1,7 @@
+<snippet>
+	<content><![CDATA[
+connect(${1:widget}, SIGNAL(${2:signal}), ${3:this}, SLOT(${4:slot}));
+]]></content>
+	<tabTrigger>connect</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

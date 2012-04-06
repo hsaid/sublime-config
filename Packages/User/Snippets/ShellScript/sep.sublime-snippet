@@ -2,10 +2,8 @@
 	<content><![CDATA[
 # ==============================================================================
 # ==============================================================================
-# ${1:title}
-
-$0
+# ${1:title}$0
 ]]></content>
 	<tabTrigger>sep</tabTrigger>
-	<scope>source.shellscript</scope>
+	<scope>source.shell</scope>
 </snippet>

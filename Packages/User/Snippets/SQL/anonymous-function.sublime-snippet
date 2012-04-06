@@ -1,0 +1,12 @@
+<snippet>
+	<content><![CDATA[
+DO \$\$
+DECLARE
+	$0
+BEGIN
+	
+END \$\$;
+]]></content>
+	<tabTrigger>anonymous-function</tabTrigger>
+	<scope>source.sql</scope>
+</snippet>

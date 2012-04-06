@@ -20,9 +20,7 @@
 
 	{ "keys": ["ctrl+h"], "command": "toggle_side_bar" },
 
-	// Undo/Redo/Copy/Paste/Etc Keys
-	{ "keys": ["ctrl+/"], "command": "undo" },
-	{ "keys": ["ctrl+shift+/"], "command": "redo" },
+	// Copy/Paste/Etc Keys
 	{ "keys": ["ctrl+x", "ctrl+x"], "command": "cut" },
 
 	// Save/Load/Etc Keys
@@ -44,8 +42,11 @@
 	{ "keys": ["ctrl+x", "ctrl+r"], "command": "show_panel", "args": {"panel": "replace"} },
 
 	// Kill Keys
-	{ "keys": ["ctrl+k"], "command": "run_macro_file", "args": {"file": "Packages/Default/Delete Line.sublime-macro"} },
+	{ "keys": ["ctrl+k", "ctrl+k"], "command": "run_macro_file", "args": {"file": "Packages/Default/Delete Line.sublime-macro"} },
 
 	// C++ keys
-	{ "keys": ["ctrl+o"], "command": "switch_file", "args": {"extensions": ["cpp", "cxx", "cc", "c", "hpp", "hxx", "h", "ipp", "inl", "m", "mm"]} }
+	{ "keys": ["ctrl+o"], "command": "switch_file", "args": {"extensions": ["cpp", "cxx", "cc", "c", "hpp", "hxx", "h", "ipp", "inl", "m", "mm"]} },
+
+	// Package Keybinds
+	{ "keys": ["ctrl+k", "ctrl+d"], "command": "format_sql" }
 ]

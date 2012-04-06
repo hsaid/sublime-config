@@ -1,8 +1,9 @@
 {
-	"auto_upgrade_last_run": 1333402899,
+	"auto_upgrade_last_run": 1333661094,
 	"installed_packages":
 	[
 		"DetectSyntax",
+		"Format SQL",
 		"Package Control",
 		"SublimeClang",
 		"SublimeRope"

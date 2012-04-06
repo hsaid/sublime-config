@@ -2,10 +2,8 @@
 	<content><![CDATA[
 SOURCES += ${1:folder}/${2:name}.cpp
 HEADERS += $1/$2.h
-FORMS   += $1/$2_ui.ui
-
-$0
+FORMS   += $1/$2_ui.ui$0
 ]]></content>
 	<tabTrigger>screen</tabTrigger>
-	<scope>source.shellscript</scope>
+	<scope>source.shell</scope>
 </snippet>

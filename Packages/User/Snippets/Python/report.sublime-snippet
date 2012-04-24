@@ -14,12 +14,12 @@ comments = ""
 category = ""
 dialog = ""
 
-report_template = "portrait"
+report_template = "${2:portrait}"
 
 # ==============================================================================
 def build_report(env):
 	rpt = Report()
-	env.extend("${2:reportname}")
+	env.extend("${3:reportname}")
 	# ----------------------------
 	
 	$0

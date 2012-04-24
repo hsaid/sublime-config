@@ -22,6 +22,7 @@
 
 	// Copy/Paste/Etc Keys
 	{ "keys": ["ctrl+x", "ctrl+x"], "command": "cut" },
+	{ "keys": ["ctrl+shift+n"], "command": "new_file" },
 
 	// Save/Load/Etc Keys
 	{ "keys": ["ctrl+x", "ctrl+s"], "command": "save" },
@@ -42,11 +43,12 @@
 	{ "keys": ["ctrl+x", "ctrl+r"], "command": "show_panel", "args": {"panel": "replace"} },
 
 	// Kill Keys
-	{ "keys": ["ctrl+k", "ctrl+k"], "command": "run_macro_file", "args": {"file": "Packages/Default/Delete Line.sublime-macro"} },
+	{ "keys": ["ctrl+k", "ctrl+k"], "command": "run_macro_file", "args": {"file": "Packages/Default/Delete to Hard EOL.sublime-macro"} },
 
 	// C++ keys
 	{ "keys": ["ctrl+o"], "command": "switch_file", "args": {"extensions": ["cpp", "cxx", "cc", "c", "hpp", "hxx", "h", "ipp", "inl", "m", "mm"]} },
 
-	// Package Keybinds
-	{ "keys": ["ctrl+k", "ctrl+d"], "command": "format_sql" }
+	// Formatting Keybinds
+	{ "keys": ["ctrl+k", "ctrl+d"], "command": "format_sql" },
+	{ "keys": ["ctrl+k", "ctrl+t"], "command": "unexpand_tabs" }
 ]

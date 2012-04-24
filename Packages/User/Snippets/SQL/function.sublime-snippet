@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-CREATE OR REPLACE FUNCTION $1() RETURNS ${2:trigger} AS
+CREATE OR REPLACE FUNCTION $1($4) RETURNS ${2:trigger} AS
 \$body\$
 DECLARE
 	$0
@@ -9,7 +9,7 @@ BEGIN
 END;
 \$body\$
 LANGUAGE 'plpgsql' ${3:VOLATILE};
-ALTER FUNCTION $1() OWNER TO leds;
+ALTER FUNCTION $1($4) OWNER TO leds;
 ]]></content>
 	<tabTrigger>function</tabTrigger>
 	<scope>source.sql</scope>

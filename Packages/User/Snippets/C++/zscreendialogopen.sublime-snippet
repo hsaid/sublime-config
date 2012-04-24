@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-${1:Class} *${2:var} = new $1();
+${1:Class}* ${2:var} = new $1();
 $2->_open(${3:record_id});
 ZScreenDialog z($2, this);
 if (z.exec() == QDialog::Accepted)

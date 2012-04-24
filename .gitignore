@@ -1,4 +1,5 @@
 .README.swp
 Settings/
 Backup/
-Packages/Default/*.cache
+Packages/
+!Packages/User/**/

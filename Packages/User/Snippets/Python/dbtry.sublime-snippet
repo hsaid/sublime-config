@@ -5,6 +5,7 @@ try:
 	db.query(" ".join(${1:sql_list}))
 	db.commit()
 except Exception, e:
+	print $1
 	db.rollback()
 	print zutil.get_stack_string()
 	print e

@@ -1,0 +1,8 @@
+<snippet>
+	<content><![CDATA[
+CREATE INDEX idx_$1_$2
+	ON $1($2) WHERE $3;
+]]></content>
+	<tabTrigger>index-conditional</tabTrigger>
+	<scope>source.sql</scope>
+</snippet>

@@ -1,9 +1,0 @@
-<snippet>
-	<content><![CDATA[
-bool is_open;
-Core::intercom()->callCheckFinancialFiscalPeriod(&is_open);
-if (!is_open) return;
-]]></content>
-	<tabTrigger>checkfinancialfiscalperiod</tabTrigger>
-	<scope>source.c++</scope>
-</snippet>

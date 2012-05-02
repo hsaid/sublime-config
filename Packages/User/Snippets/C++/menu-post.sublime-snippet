@@ -1,0 +1,19 @@
+<snippet>
+	<content><![CDATA[
+bool auto_post_source_documents = zt::isTrue(Core::instance()->settings()->lookup("financial", "auto_post_source_documents"));
+bool has_post_permission = Core::hasPermission("financial_post", Core::currentAgenciesid());
+bool has_unpost_permission = Core::hasPermission("financial_unpost", Core::currentAgenciesid());
+
+menuPane->addCategory(QStringList() << "Menu" << _current_financial_fund_name);
+if (${1:_posted}.toBool() && has_unpost_permission)
+{
+	menuPane->addItem("<a href=\"unpost$2\">Unpost ${2:Type}</a>");
+}
+else if(!$1.toBool() && has_post_permission && !auto_post_source_documents)
+{
+	menuPane->addItem("<a href=\"post$2\">Post $2</a>");
+}
+]]></content>
+	<tabTrigger>menu-post</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

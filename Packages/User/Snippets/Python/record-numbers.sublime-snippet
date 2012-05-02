@@ -1,0 +1,16 @@
+<snippet>
+	<content><![CDATA[
+# ==============================================================================
+@profile
+def allocate_${1:type}_number(owner_agenciesid):
+	return record_numbers.allocate_record_number("${2:table}.${3:record_number}", sequence_agenciesid = owner_agenciesid)
+
+# ==============================================================================
+@profile
+def free_$1_number($3, owner_agenciesid):
+	record_numbers.free_record_number("$2.$3", $3,
+									  sequence_agenciesid = owner_agenciesid)
+]]></content>
+	<tabTrigger>record-numbers</tabTrigger>
+	<scope>source.python</scope>
+</snippet>

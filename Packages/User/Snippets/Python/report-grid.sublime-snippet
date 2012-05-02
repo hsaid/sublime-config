@@ -1,0 +1,11 @@
+<snippet>
+	<content><![CDATA[
+${1:g} = Grid()
+$1.set_col_widths(0,0,0)
+$1.add_row("<b>${2:Header}</b>", "%${3:column}%", " ")
+$0
+rpt.add_item(g)
+]]></content>
+	<tabTrigger>report-grid</tabTrigger>
+	<scope>source.python</scope>
+</snippet>

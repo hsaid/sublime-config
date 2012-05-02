@@ -1,0 +1,9 @@
+<snippet>
+	<content><![CDATA[
+${1:_model}.addField("$2", $3);
+$1.setRequired($3, true, "$4");
+connectModel(&$1);
+]]></content>
+	<tabTrigger>zsqlmodel</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

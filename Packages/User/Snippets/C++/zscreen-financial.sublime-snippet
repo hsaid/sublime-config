@@ -16,9 +16,6 @@ public:
 	virtual ZScreen* emptyScreen() { return new $3(); }
 	virtual QString screenKey(const QString& id = "") { return $3_scr::screenKey(id); }
 	virtual void fillMenuPane(ZTaskPane* menuPane);
-
-public slots:
-	virtual void setCaption(const QString& caption = "");
 	
 protected:
 	virtual void open(const QString& $4id);
@@ -46,14 +43,6 @@ $3::$3(QWidget* parent, const char* name, WFlags f)
 	  _model("${4:table}")
 {
 	Core::intercom()->callGetFinancialCurrentFund(&_current_financial_fund_name, &_current_financial_fund_id);
-
-	// _model.addField("foo", lneFoo);
-	
-	// _model.setRequired(lneFoo, true, "Foo");
-	
-	connectModel(&_model);
-	
-	//connect(fooControl, SIGNAL(fooSignal()), this, SLOT(fooSlot()));
 }
 
 //==============================================================================
@@ -64,7 +53,6 @@ $3::~$3()
 void $3::fillMenuPane(ZTaskPane* menuPane)
 {
 	menuPane->addCategory(QStringList() << "Menu" << _current_financial_fund_name);
-	//menuPane->addItem("<a href=\"foo\">Foo</a>");
 }
 
 //==============================================================================
@@ -83,15 +71,13 @@ void $3::handleLink(const QString& link)
 //==============================================================================
 void $3::open(const QString& $4id)
 {
-	_model.setRecord(zsql::checkInt($4id));
-	setCaption();
+	
 }
 
 //==============================================================================
 void $3::save()
 {
-	_model.save();
-	setCaption();
+	
 }
 
 //==============================================================================
@@ -103,26 +89,8 @@ void $3::requery()
 //==============================================================================
 void $3::print()
 {
-	ZReportParams p;
-	p["$4id"] = zsql::checkInt(_model.getRecord());
-	Core::intercom()->callOpenReport("module", "reportname", p);
+	
 }
-
-//==============================================================================
-void $3::setCaption(const QString& /*caption*/)
-{
-	QString caption;
-	if (zsql::isInt(_model.getRecord()))
-	{
-		caption = "${5:Caption} - " + /* main text widget */;
-	}
-	else
-	{
-		caption = "New $5";
-	}
-	$3_scr::setCaption(caption);
-}
-
 ]]></content>
 	<tabTrigger>zscreen-financial</tabTrigger>
 	<scope>source.c++</scope>

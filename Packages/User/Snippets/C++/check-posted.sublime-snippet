@@ -1,0 +1,13 @@
+<snippet>
+	<content><![CDATA[
+if (!${1:_posted}.toBool())
+{
+	QString msg = "Adding a $2 requires posting this $3. Continue?";
+	if (ZMessageBox::yNQuestion(this, "Post $4?", msg) == QMessageBox::No) return;
+
+	if (!${5:postReceipt()}) return;
+}
+]]></content>
+	<tabTrigger>check-posted</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

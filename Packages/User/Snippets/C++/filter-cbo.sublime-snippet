@@ -1,0 +1,11 @@
+<snippet>
+	<content><![CDATA[
+QString ${2:id} = ${1:cbo}->currentKey();
+if (zsql::isInt($2))
+{
+	${3:where_parts} << "${4:col} = " + $2;
+}
+]]></content>
+	<tabTrigger>filter-cbo</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

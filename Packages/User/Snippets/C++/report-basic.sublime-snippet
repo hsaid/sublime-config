@@ -1,0 +1,9 @@
+<snippet>
+	<content><![CDATA[
+ZReportParams p;
+p["${1:id}"] = zsql::checkInt(_model.get("$1").toString());
+Core::intercom()->callOpenReport("${2:module}", "${3:report_name}", p);
+]]></content>
+	<tabTrigger>report-basic</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

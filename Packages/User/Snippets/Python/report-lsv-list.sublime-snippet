@@ -1,0 +1,13 @@
+<snippet>
+	<content><![CDATA[
+rpt.add_item(FilterGrid(env["filters"], env["filter_order"]))
+rpt.add_item(std_break())
+
+t = SqlTable("%s %s %s" % (env["sql"], env["order_by"], env["limit"]))
+t.add_col("<b>${1:Header}</b>", Text("%${2:column}%"), ${3:width}*inch)$0
+
+rpt.add_item(t)
+]]></content>
+	<tabTrigger>report-lsv-list</tabTrigger>
+	<scope>source.python</scope>
+</snippet>

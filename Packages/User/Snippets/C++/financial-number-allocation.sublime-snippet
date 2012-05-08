@@ -1,0 +1,41 @@
+<snippet>
+	<content><![CDATA[
+//==============================================================================
+void ${5:Class}::showScreen()
+{
+	if (_${1:number}.isNull())
+	{
+		try
+		{
+			_$1 = python::runOnServerE("financial.${2:module}", "allocate_${1:number}",
+												   python::List() << Core::currentAgenciesid()).toString();
+		}
+		catch (zt::exception& e)
+		{
+			zwarn << __FUNCTION__ << "() -- " << e.what() << endl;
+		}
+	}
+
+	setCaption("${3:Type} - #" + _$1.toString());
+}
+
+//==============================================================================
+void $5::closeScreen(bool)
+{
+	if (!zsql::isInt(_model.get("${4:id}")))
+	{
+		try
+		{
+			python::runOnServerE("financial.$2", "free_$1",
+								 python::List() << _$1 << Core::currentAgenciesid());
+		}
+		catch (zt::exception& e)
+		{
+			zwarn << __FUNCTION__ << "() -- " << e.what() << endl;
+		}
+	}
+}
+]]></content>
+	<tabTrigger>financial-number-allocation</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

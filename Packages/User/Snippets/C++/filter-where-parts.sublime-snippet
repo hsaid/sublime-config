@@ -1,0 +1,10 @@
+<snippet>
+	<content><![CDATA[
+QStringList where_parts;
+where_parts << "${1:f}.active = TRUE"
+			<< "$1.owner_agenciesid = " + Core::currentAgenciesid()
+			<< "$1.financial_fundsid = " + _current_financial_fund_id;
+]]></content>
+	<tabTrigger>filter-where-parts</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

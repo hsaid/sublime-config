@@ -1,0 +1,14 @@
+<snippet>
+	<content><![CDATA[
+QStringList args = QStringList::split("\t", link);
+args << "" << "";
+
+if (args[0] == "${1:name}") { $1($2); }$0
+else
+{
+	Core::intercom()->handleLink(link);
+}
+]]></content>
+	<tabTrigger>handleLink</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

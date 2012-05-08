@@ -1,0 +1,41 @@
+<snippet>
+	<content><![CDATA[
+# ==============================================================================
+# ${1:Deposit} Screen
+# ==============================================================================
+@profile
+def save_${2:deposit}(model_values):
+	sql_list = []
+
+	$2_record = recordtypes.${3:DepositRecord}()
+	$2_record.from_map(model_values)
+
+	${4:financial_depositsid}, sql = $2_record.save_sql()
+	sql_list.append(sql)
+	$2_record.$4 = $4
+
+	db.begin()
+	try:
+		db.query(" ".join(sql_list))
+		db.commit()
+	except Exception, e:
+		print sql_list
+		db.rollback()
+		print zutil.get_stack_string()
+		print e
+		raise
+
+	return ($2_record.to_map(),)
+
+# ==============================================================================
+@profile
+def load_$2($4):
+	$2_record = recordtypes.$3()
+	$2_record.load($4)
+	model_values = $2_record.to_map()
+
+	return (model_values,)
+]]></content>
+	<tabTrigger>screen-save-load</tabTrigger>
+	<scope>source.python</scope>
+</snippet>

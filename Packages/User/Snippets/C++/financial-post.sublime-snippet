@@ -1,0 +1,15 @@
+<snippet>
+	<content><![CDATA[
+python::Map model_values = ${1:_model}.getValues();
+model_values["owner_agenciesid"] = Core::currentAgenciesid();
+model_values["active"] = QVariant(true, 0);
+
+_posted = python::runOnServerE("financial.${2:module}", "${3:method}",
+								python::List() << model_values);
+
+setReadOnly(_posted.toBool());
+Core::instance()->refreshMenu();
+]]></content>
+	<tabTrigger>financial-post</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

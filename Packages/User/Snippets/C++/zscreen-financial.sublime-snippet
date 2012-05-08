@@ -58,14 +58,7 @@ void $3::fillMenuPane(ZTaskPane* menuPane)
 //==============================================================================
 void $3::handleLink(const QString& link)
 {
-	QStringList args = QStringList::split("\t", link);
-	args << "" << "";
-
-	if (args[0] == "foo") { /* callFoo(args[1]); */ }
-	else
-	{
-		Core::intercom()->handleLink(link);
-	}
+	
 }
 
 //==============================================================================

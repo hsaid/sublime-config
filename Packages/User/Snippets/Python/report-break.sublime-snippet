@@ -1,0 +1,7 @@
+<snippet>
+	<content><![CDATA[
+rpt.add_item(std_break())
+]]></content>
+	<tabTrigger>report-break</tabTrigger>
+	<scope>source.python</scope>
+</snippet>

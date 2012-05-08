@@ -1,0 +1,17 @@
+<snippet>
+	<content><![CDATA[
+python::Map model_values = ${1:_model}.getValues();
+model_values["owner_agenciesid"] = Core::currentAgenciesid();
+model_values["active"] = QVariant(true, 0);
+
+bool auto_post_source_documents = zt::isTrue(Core::instance()->settings()->lookup("financial", "auto_post_source_documents"));
+python::List data = python::runOnServerE("financial.${2:module}", "${3:save_method}",
+										python::List() << model_values << auto_post_source_documents).toList();
+model_values = data[0].toMap();
+$1.populateFields(model_values);
+
+setReadOnly(${4:_posted}.toBool());
+]]></content>
+	<tabTrigger>financial-save</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

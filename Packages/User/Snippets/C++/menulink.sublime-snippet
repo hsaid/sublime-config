@@ -1,7 +1,0 @@
-<snippet>
-	<content><![CDATA[
-${1:menuPane}->addItem("<a href=\"$2\">$3</a>");
-]]></content>
-	<tabTrigger>menulink</tabTrigger>
-	<scope>source.c++</scope>
-</snippet>

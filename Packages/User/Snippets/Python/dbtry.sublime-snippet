@@ -2,11 +2,11 @@
 	<content><![CDATA[
 db.begin()
 try:
-	db.query(" ".join(${1:sql_list}))
+	db.query(${1:" ".join(sql_list)})
 	db.commit()
 except Exception, e:
-	print $1
 	db.rollback()
+	print ${2:sql_list}
 	print zutil.get_stack_string()
 	print e
 	raise

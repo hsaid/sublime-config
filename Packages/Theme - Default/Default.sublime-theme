@@ -460,10 +460,10 @@
         "layer1.opacity": 1.0,
 
         "content_margin": [3, 0, 3, 1],
-        "tab_overlap": 17,
+        "tab_overlap": 30,
         "tab_width": 180,
         "tab_min_width": 48,
-        "tab_height": 35,
+        "tab_height": 24,
         "mouse_wheel_switch": false
     },
     {

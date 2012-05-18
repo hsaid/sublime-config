@@ -1,11 +1,10 @@
 {
 	"color_scheme": "Packages/Color Scheme - Default/Solarized (Dark).tmTheme",
-	"font": "PragmataPro",
+	"font": "PragmataPro Regular",
 	"font_size": 8,
 	"ignored_packages":
 	[
 		"Vintage",
-		"SublimeClang",
-		"SublimeRope"
+		"SublimeClang"
 	]
 }

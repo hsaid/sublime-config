@@ -1,0 +1,7 @@
+<snippet>
+	<content><![CDATA[
+Core::intercom()->callOpenFinancialSourceDocument("${1:tag}", ${2:id}, ${3:python::Map()});
+]]></content>
+	<tabTrigger>openfinancialsourcedocument</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

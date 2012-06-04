@@ -1,0 +1,18 @@
+<snippet>
+	<content><![CDATA[
+QString type = item->text(COL_TYPE).lower();
+QString record_id = item->id();
+
+if (!zsql::isInt(record_id)) return;
+
+bool success;
+Core::intercom()->callVoidFinancialSourceDocument(&success, type, record_id);
+
+if (success)
+{
+	ZCore::singleShotAtMainLoop(this, SLOT(_requery()));
+}
+]]></content>
+	<tabTrigger>financial-voidsourcedocument</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

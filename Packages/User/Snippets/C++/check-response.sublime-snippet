@@ -1,0 +1,11 @@
+<snippet>
+	<content><![CDATA[
+if (${1:values}.size() != ${2:num})
+{
+	zwarn << __FUNCTION__ << "(" << __LINE__ << "): " << "${3:python_function} server response was malformed" << endl;
+	return;
+}
+]]></content>
+	<tabTrigger>check-response</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

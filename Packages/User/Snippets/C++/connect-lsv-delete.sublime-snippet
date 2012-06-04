@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-connect(${1:lsv}, SIGNAL(keyPressed_Delete()), this, SLOT(${2:deleteItem()}));
+connect(${1:lsv}, SIGNAL(keyPressed_Delete(${2:const QString&})), this, SLOT(${3:deleteItem()}));
 ]]></content>
 	<tabTrigger>connect-lsv-delete</tabTrigger>
 	<scope>source.c++</scope>

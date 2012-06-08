@@ -1,0 +1,27 @@
+<snippet>
+	<content><![CDATA[
+if (!zsql::isInt(${1:financial_bank_reconciliationsid})) return;
+
+try
+{
+    if (!Core::hasPermission(deletePermission(), Core::currentAgenciesid()))
+    {
+    	Core::info(tr("You don't have permission to remove this record."));
+    	return;
+    }
+
+    if (zt::confirmDelete())
+    {
+    	python::runOnServerE("${2:financial.bankreconciliations}", "${3:delete_bank_reconciliation}",
+    						python::List() << $1);
+    	ZCore::singleShotAtMainLoop(this, SLOT(_requery()));
+    }
+}
+catch (zt::exception& e)
+{
+	zwarn << __FUNCTION__ << "() -- " << e.what() << endl;
+}
+]]></content>
+	<tabTrigger>financial-deleterecord</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

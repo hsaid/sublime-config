@@ -1,0 +1,8 @@
+<snippet>
+	<content><![CDATA[
+QString msg = "$1";
+if (ZMessageBox::yNQuestion(this, "$2", msg) == QMessageBox::${3:No}) $0
+]]></content>
+	<tabTrigger>yNQuestion</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

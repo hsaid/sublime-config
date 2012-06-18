@@ -3,6 +3,6 @@
 QString fund_name, fund_id;
 Core::intercom()->callGetFinancialCurrentFund(&fund_name, &fund_id);
 ]]></content>
-	<tabTrigger>getcurrentfund</tabTrigger>
+	<tabTrigger>financial-getcurrentfund</tabTrigger>
 	<scope>source.c++</scope>
 </snippet>

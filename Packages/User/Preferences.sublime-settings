@@ -2,11 +2,11 @@
 	"color_scheme": "Packages/Color Scheme - Default/Solarized (Dark).tmTheme",
 	"font": "PragmataPro Regular",
 	"font_size": 8,
-	"overlay_scroll_bars": "enabled",
 	"ignored_packages":
 	[
 		"SublimeClang",
 		"Vintage",
 		"SublimeRope"
-	]
+	],
+	"overlay_scroll_bars": "enabled"
 }

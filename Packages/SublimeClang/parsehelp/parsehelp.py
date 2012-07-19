@@ -164,7 +164,7 @@ def extract_completion_objc(before):
         before = before[:-len(match.group(1))]
     return ret
 
-_keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in", "case", "default", "goto", "typedef", "struct"]
+_keywords = ["return", "new", "delete", "class", "define", "using", "void", "template", "public:", "protected:", "private:", "public", "private", "protected", "typename", "in", "case", "default", "goto", "typedef", "struct", "else"]
 
 
 def extract_package(data):
@@ -244,7 +244,7 @@ def remove_classes(data):
 
 
 def remove_functions(data):
-    regex = re.compile(r"\S+\s*\([^\)]*\)\s*(const)?[^;{]*\{\}", re.MULTILINE)
+    regex = re.compile(r"([^\s;{}]+\s+)?[^\s;{}]+\s*\([^\)]*\)\s*(const)?[^;{]*\{\}", re.MULTILINE)
     return regex.sub("", data)
 
 
@@ -326,7 +326,7 @@ def extract_variables(data):
     data = remove_namespaces(data)
     data = remove_classes(data)
     data = re.sub(r"\([^)]*?\)\s*(?=;)", "()", data, re.MULTILINE)
-    data = re.sub(r"\s*case\s+([\w]+(::)?)+:", "", data, re.MULTILINE)
+    data = re.sub(r"\s*case\s+[\w:]*[^:]:[^:]", "", data, re.MULTILINE)
     data = re.sub(r"\s*default:\s*", "", data, re.MULTILINE)
     data = re.sub(r"template\s*<>", "", data, re.MULTILINE)
 
@@ -344,7 +344,7 @@ def extract_variables(data):
     # Next, take care of all other variables
     data = collapse_parenthesis(data)
 
-    pattern = r"(^\s*|,|\()\s*((static\s*)?(struct\s*)?\b(const\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^;()]+)\s*(?=%s)" % (_invalid, _endpattern)
+    pattern = r"(^|,|\()\s*((static\s*)?(struct\s*)?\b(const\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^;()]+)\s*(?=%s)" % (_invalid, _endpattern)
     regex = re.compile(pattern, re.MULTILINE)
 
     for m in regex.finditer(data):
@@ -356,7 +356,6 @@ def extract_variables(data):
         type = m.group(2).strip()
         var = m.group(7).strip()
         patch_up_variable(origdata, data, type, var, ret)
-
     return ret
 
 

@@ -1,7 +1,7 @@
 import sublime, sublime_plugin
 import os, string, re
 
-plugin_directory = os.getcwd()
+plugin_directory = os.getcwdu()
 
 class DetectSyntaxCommand(sublime_plugin.EventListener):
 	def __init__(self):
@@ -11,10 +11,20 @@ class DetectSyntaxCommand(sublime_plugin.EventListener):
 		self.view = None
 		self.syntaxes = []
 		self.plugin_name = 'DetectSyntax'
-		# self.plugin_dir = sublime.packages_path() + os.path.sep + self.plugin_name
 		self.plugin_dir = plugin_directory
 		self.user_dir = sublime.packages_path() + os.path.sep + 'User'
+		self.settings_file = self.plugin_name + '.sublime-settings'
 		self.reraise_exceptions = False
+
+		self.ensure_user_settings()
+
+
+	def on_new(self, view):
+		settings = sublime.load_settings(self.settings_file)
+		name = settings.get("new_file_syntax")
+		if name:
+			self.view = view
+			self.set_syntax(name)
 
 
 	def on_load(self, view):
@@ -38,7 +48,7 @@ class DetectSyntaxCommand(sublime_plugin.EventListener):
 		for syntax in self.syntaxes:
 			# stop on the first syntax that matches
 			if self.syntax_matches(syntax):
-				self.set_syntax(syntax)
+				self.set_syntax(syntax.get("name"))
 				break
 
 
@@ -50,9 +60,7 @@ class DetectSyntaxCommand(sublime_plugin.EventListener):
 		self.reraise_exceptions = False
 
 
-	def set_syntax(self, syntax):
-		name = syntax.get("name")
-
+	def set_syntax(self, name):
 		# the default settings file uses / to separate the syntax name parts, but if the user
 		# is on windows, that might not work right. And if the user happens to be on Mac/Linux but
 		# is using rules that were written on windows, the same thing will happen. So let's
@@ -126,12 +134,18 @@ class DetectSyntaxCommand(sublime_plugin.EventListener):
 
 		# is path_to_file absolute?
 		if not os.path.isabs(path_to_file):
-			# it's not, so look in Packages/User
-			if os.path.exists(self.user_dir + os.path.sep + path_to_file):
-				path_to_file = self.user_dir + os.path.sep + path_to_file
+			user_file = self.user_dir + os.path.sep + path_to_file
+			plugin_file = self.plugin_dir + os.path.sep + path_to_file
+
+			# it's not absolute, so look in Packages/User
+			if os.path.exists(user_file):
+				path_to_file = user_file
+			# now look in the plugin's directory
+			elif os.path.exists(plugin_file):
+				path_to_file = plugin_file
 			else:
-				# now look in the plugin's directory
-				path_to_file = self.plugin_dir + os.path.sep + path_to_file
+				# can't find it ... nothing more to do
+				return False
 
 		# bubble exceptions up only if the user wants them
 		try:
@@ -178,3 +192,29 @@ class DetectSyntaxCommand(sublime_plugin.EventListener):
 		else:
 			return False
 
+
+	def ensure_user_settings(self):
+		user_settings_file = self.user_dir + os.path.sep + self.settings_file
+		if os.path.exists(user_settings_file):
+			return
+
+		# file doesn't exist, let's create a bare one
+		output = """
+{
+	// If you want exceptions reraised so you can see them in the console, change this to true.
+	"reraise_exceptions": false,
+
+	// If you want to have a syntax applied when new files are created, set new_file_syntax to the name of the syntax to use.
+	// The format is exactly the same as "name" in the rules below. For example, if you want to have a new file use 
+	// JavaScript syntax, set new_file_syntax to 'JavaScript'.
+	"new_file_syntax": false,
+
+	// Put your custom syntax rules here:
+	"syntaxes": [
+	]
+}
+"""
+
+		file = open(user_settings_file, 'w')
+		file.write(output)
+		file.close

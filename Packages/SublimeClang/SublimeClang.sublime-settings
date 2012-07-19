@@ -16,7 +16,15 @@
     // the plugin completely for a specific project.
     "enabled": true,
 
-    // Wheter or not fast completions are enabled. Usually you'd put
+    // Whether or not to automatically trigger the auto complete
+    // window when typing object., object-> or similar.
+    "automatic_completion_popup": true,
+
+    // Number of worker threads to create. If set to -1 it'll create
+    // one thread per cpu
+    "worker_threadcount": -1,
+
+    // Whether or not fast completions are enabled. Usually you'd put
     // "sublimeclang_enable_fast_completions": false, in the project
     // settings if it's problematic in that project. You can also
     // runtime toggle fast completions alt+d,alt+f, however if it
@@ -41,9 +49,12 @@
     // Whether or not to show the clang parser status in the status bar
     "show_status": true,
 
-    // When set to true, will display visual error markers. recompile_delay
-    // must be set to > 0
+    // When set to true, will display visual error markers.
     "show_visual_error_marks": true,
+
+    // When set to true, error marks will only be displayed when the error
+    // panel is showing
+    "error_marks_on_panel_only": false,
 
     // This is the bitmask sent to index.parse.
     // For example, to be able to go to the definition of
@@ -113,7 +124,7 @@
     // If set to true it'll add for example "-x c++" to the options for c++ files
     "add_language_option": true,
 
-    // Addtional language specific options for clang.
+    // Additional language specific options for clang.
     // This option only works when "add_language_option" is set to true.
     "additional_language_options":
     {
@@ -153,9 +164,11 @@
     // so to make them take effect you'll have to clear the cache first. The
     // default keybinding for clearing the cache is alt+d,alt+c.
     //
-    // ${home}, ${project_path:} and ${folder:} tokens can be used in these options.
+    // ${home}, ${env:<variable>}, ${project_path:} and ${folder:} tokens can be used in these options.
     //
     // ${home} is replaced with the value of the HOME environment variable.
+    //
+    // ${env:<variable>} is replaced with the "variable" environment variable.
     //
     // ${project_path:} tries to find a file with the given name in all the registered project folders and
     // returns the first file found, or the original file name if none is found.
@@ -165,8 +178,8 @@
     // ${folder:} is replaced with the dirname of the given path.
     // Example: ${folder:/path/to/file} is replaced with "/path/to".
     //
-    // Replacement is done sequencially, first all ${home} tokens, then all ${project_path:} are resolved, and then the
-    // ${folder:} are replaced.
+    // Replacement is done sequentially, first all ${project_path:} are resolved, then ${home} and
+    // ${env:<variable>} tokens,  and then the ${folder:} are replaced,
     //
     // So for example, you might specify:
     //       "-I${folder:${project_path:main.cpp}}",
@@ -267,7 +280,7 @@
     // Scope used for markers by the analyzer in the file views
     "marker_analyzer_scope": "invalid",
 
-    // Commandline used to invoke the static analyzer.
+    // Command line used to invoke the static analyzer.
     // "options" will be appended to this
     "analyzer_commandline":
     [

@@ -1,0 +1,14 @@
+<snippet>
+	<content><![CDATA[
+python::List ${1:values} = python::runOnServerE("${2:financial.purchaserequisitions}", "${3:load_purchase_requisition}",
+											python::List() << ${4:financial_purchase_requisitionsid}).toList();
+if ($1.size() != ${5:num})
+{
+	zwarn << __FUNCTION__ << "(" << __LINE__ << "): " 
+		  << "$3 server response was malformed. Expected: $5. Got: " << ZVAR($1.size()) << endl;
+	${6:throw};
+}
+]]></content>
+	<tabTrigger>runOnServerE-list</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

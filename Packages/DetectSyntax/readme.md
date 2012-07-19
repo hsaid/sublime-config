@@ -51,8 +51,37 @@ It all started by forking the plugin created by JeanMertz (1). I modified it qui
 (2) [https://gist.github.com/1497794] (https://gist.github.com/1497794)  
 (3) [https://github.com/aparajita/SetSyntax] (https://github.com/aparajita/SetSyntax)
 
+Contributing
+------------
+
+* Fork the project.
+* Use topic branch.
+* Make pull request.
+
 History
 -------
+2012-07-12
+
+* Added support for .simplecov (https://github.com/colszowka/simplecov#using-simplecov-for-centralized-config) [Closes #9, thanks Andrey Botalov]
+* Added Preferences menu [Closes #8, thanks Kirk Strauser]
+* Create a bare-bones user settings file if one doesn't exist
+
+2012-07-02
+
+* Fixed improper handling of directories with non-ascii characters [Closes #5, thanks Andrew Dryga]
+
+2012-06-28
+
+* Better handling of file defining a function potentially not existing.
+
+2012-06-26
+
+* Added new_file_syntax so new files can have a syntax applied immediately.
+
+2012-06-20
+
+* Added rule for *.thor (thanks Magnus Rex).
+
 2012-04-13
 
 * Renamed the `syntaxes` key to `default_syntaxes` so it is no longer necessary to duplicate default rules in User/DetectSyntax.sublime-settings.

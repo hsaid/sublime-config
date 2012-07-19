@@ -50,7 +50,7 @@ try:
 
 
     def is_supported_language(view):
-        if view.is_scratch() or not get_setting("enabled", True, view):
+        if view.is_scratch() or not get_setting("enabled", True, view) or view.file_name() == None:
             return False
         language = get_language(view)
         if language == None or (language != "c++" and
@@ -79,7 +79,6 @@ try:
         return get_settings().get(key, default)
 
     def expand_path(value, window):
-        value = value % ({'home': os.getenv('HOME')})
         if window == None:
             # Views can apparently be window less, in most instances getting
             # the active_window will be the right choice (for example when
@@ -102,7 +101,10 @@ try:
                 if os.path.exists(path) \
             ]
         value = re.sub(r'\${project_path:(?P<file>[^}]+)}', lambda m: len(get_existing_files(m)) > 0 and get_existing_files(m)[0] or m.group('file'), value)
-        value = re.sub(r'\${folder:(?P<file>.*)}', lambda m: os.path.dirname(m.group('file')), value)
+        value = re.sub(r'\${env:(?P<variable>[^}]+)}', lambda m: os.getenv(m.group('variable')) if os.getenv(m.group('variable')) else "%s_NOT_SET" % m.group('variable'), value)
+        value = re.sub(r'\${home}', os.getenv('HOME') if os.getenv('HOME') else "HOME_NOT_SET", value)
+        value = re.sub(r'\${folder:(?P<file>[^}]+)}', lambda m: os.path.dirname(m.group('file')), value)
+        value = value.replace('\\', '/')
 
         return value
 except:
@@ -145,7 +147,7 @@ class LockedVariable:
 
 class Worker(object):
     def __init__(self, threadcount=-1):
-        if threadcount == -1:
+        if threadcount < 1:
             threadcount = get_cpu_count()
         self.tasks = Queue.Queue()
         for i in range(threadcount):

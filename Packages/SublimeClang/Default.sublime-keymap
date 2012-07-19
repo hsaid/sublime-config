@@ -35,7 +35,7 @@
     "keys": ["alt+d", "alt+t"]
   },
   {
-    "command": "show_panel", "args": {"panel": "output.clang", "toggle": true},
+    "command": "clang_toggle_panel",
     "keys": ["alt+d", "alt+p"]
   },
     {
@@ -65,24 +65,29 @@
     "command": "clang_complete",
     "args": {"characters": "."},
     "keys": ["."],
-    "context": [ {"key": "clang_supported_language"}, {"key": "clang_is_code"}, {"key": "clang_complete_enabled"}]
+    "context": [ {"key": "clang_supported_language"}, {"key": "clang_is_code"}, {"key": "clang_complete_enabled"}, {"key": "clang_automatic_completion_popup"}]
   },
   {
     "command": "clang_complete",
     "args": {"characters": " "},
     "keys": [" "],
-    "context": [ {"key": "clang_supported_language"}, {"key": "clang_is_code"}, {"key": "clang_complete_enabled"}]
+    "context": [ {"key": "clang_supported_language"}, {"key": "clang_is_code"}, {"key": "clang_complete_enabled"}, {"key": "clang_automatic_completion_popup"}, { "key": "auto_complete_visible", "operator": "equal", "operand": false }]
   },
   {
     "command": "clang_complete",
     "args": {"characters": ":"},
     "keys": [":"],
-    "context": [ {"key": "clang_supported_language"}, {"key": "clang_is_code"}, {"key": "clang_complete_enabled"}]
+    "context": [ {"key": "clang_supported_language"}, {"key": "clang_is_code"}, {"key": "clang_complete_enabled"}, {"key": "clang_automatic_completion_popup"}]
   },
   {
     "command": "clang_complete",
     "args": {"characters": ">"},
     "keys": [">"],
-    "context": [ {"key": "clang_supported_language"}, {"key": "clang_is_code"}, {"key": "clang_complete_enabled"}]
+    "context": [ {"key": "clang_supported_language"}, {"key": "clang_is_code"}, {"key": "clang_complete_enabled"}, {"key": "clang_automatic_completion_popup"}]
+  },
+  {
+    "command": "clang_toggle_panel",
+    "keys": ["escape"],
+    "context": [{"key": "clang_panel_visible"}]
   }
 ]

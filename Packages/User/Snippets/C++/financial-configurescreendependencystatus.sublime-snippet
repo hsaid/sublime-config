@@ -1,0 +1,11 @@
+<snippet>
+	<content><![CDATA[
+QString ${1:id} = _model.get("$1").toString();
+if (zsql::isInt($1))
+{
+	Financial::configureScreenDependencyStatus(this, "${2:tag}", $1);
+}
+]]></content>
+	<tabTrigger>financial-configurescreendependencystatus</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

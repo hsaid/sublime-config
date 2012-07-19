@@ -1,0 +1,9 @@
+<snippet>
+	<content><![CDATA[
+python::Map model_values = _model.getValues();
+model_values["owner_agenciesid"] = Core::currentAgenciesid();
+model_values["active"] = QVariant(true, 0);
+]]></content>
+	<tabTrigger>financial-get-model-values</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

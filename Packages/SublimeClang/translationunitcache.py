@@ -103,6 +103,19 @@ cache_clangComplete.argtypes = [c_void_p, c_char_p, c_uint, c_uint, POINTER(cind
 cache_clangComplete.restype = POINTER(CacheCompletionResults)
 
 
+def remove_duplicates(data):
+    if data == None:
+        return None
+    seen = {}
+    ret = []
+    for d in data:
+        if d in seen:
+            continue
+        seen[d] = 1
+        ret.append(d)
+    return ret
+
+
 class Cache:
     def __init__(self, tu, filename):
         self.cache = _createCache(tu.cursor)
@@ -123,11 +136,12 @@ class Cache:
 
     def complete_namespace(self, namespace):
         ret = None
-        nsarg = self.get_native_namespace(namespace)
-        comp = cache_completeNamespace(self.cache, nsarg, len(nsarg))
-        if comp:
-            ret = [(x.display, x.insert) for x in comp[0]]
-            cache_disposeCompletionResults(comp)
+        if len(namespace):
+            nsarg = self.get_native_namespace(namespace)
+            comp = cache_completeNamespace(self.cache, nsarg, len(nsarg))
+            if comp:
+                ret = [(x.display, x.insert) for x in comp[0]]
+                cache_disposeCompletionResults(comp)
         return ret
 
     def get_namespace_from_cursor(self, cursor):
@@ -285,7 +299,7 @@ class Cache:
                         namespace = self.get_namespace_from_cursor(curr)
                         ret = self.complete_namespace(namespace)
                         c = None
-                if not c is None and not c.kind.is_invalid():
+                if not c is None and not c.kind.is_invalid() and c.kind != cindex.CursorKind.NAMESPACE:
                     # It's going to be a declaration of some kind, so
                     # get the returned cursor
                     c = c.get_returned_cursor()
@@ -294,6 +308,9 @@ class Cache:
                         c = None
                         ret = None
                 if not c is None and not c.kind.is_invalid():
+                    if c.kind == cindex.CursorKind.NAMESPACE:
+                        namespace = self.get_namespace_from_cursor(c)
+                        return self.complete_namespace(namespace)
                     comp = cache_completeCursor(self.cache, c)
 
                     if comp:
@@ -526,22 +543,16 @@ class Cache:
                                             add = False
                                             break
                                     if add:
-                                        add = (c.display, c.insert)
-                                        if add not in ret:
-                                            ret.append(add)
+                                        ret.append((c.display, c.insert))
                             elif m2 == "->":
                                 for c in comp[0]:
                                     if c.cursor.kind != cindex.CursorKind.OBJC_IVAR_DECL:
                                         continue
-                                    add = (c.display, c.insert)
-                                    if add not in ret:
-                                        ret.append(add)
+                                    ret.append((c.display, c.insert))
                             else:
                                 for c in comp[0]:
                                     if c.static == isStatic and c.cursor.kind != cindex.CursorKind.OBJC_IVAR_DECL:
-                                        add = (c.display, c.insert)
-                                        if add not in ret:
-                                            ret.append(add)
+                                        ret.append((c.display, c.insert))
                         else:
                             for c in comp[0]:
                                 if not c.static and c.cursor.kind != cindex.CursorKind.ENUM_CONSTANT_DECL and \
@@ -558,10 +569,9 @@ class Cache:
                                         disp = re.sub(r[0], r[1], disp)
                                         ins = re.sub(r[0], r[1], ins)
                                     add = (disp, ins)
-                                    if add not in ret:
-                                        ret.append(add)
+                                    ret.append(add)
                         cache_disposeCompletionResults(comp)
-            return ret
+            return remove_duplicates(ret)
         else:
             cached_results = cache_complete_startswith(self.cache, prefix)
             if cached_results:
@@ -572,7 +582,7 @@ class Cache:
             if len(var) and ret == None:
                 ret = []
             for v in var:
-                if v[1].startswith(prefix) and not v in ret:
+                if v[1].startswith(prefix):
                     ret.append(v)
             clazz = extract_class_from_function(data)
             if clazz == None:
@@ -593,11 +603,9 @@ class Cache:
                     if comp:
                         for c in comp[0]:
                             if not c.static and \
-                                    not c.cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL and \
                                     not (c.baseclass and c.access == cindex.CXXAccessSpecifier.PRIVATE):
                                 add = (c.display, c.insert)
-                                if add not in ret:
-                                    ret.append(add)
+                                ret.append(add)
                         cache_disposeCompletionResults(comp)
             namespaces = extract_used_namespaces(data)
             ns = extract_namespace(data)
@@ -608,7 +616,7 @@ class Cache:
                 add = self.complete_namespace(ns)
                 if add:
                     ret.extend(add)
-        return ret
+        return remove_duplicates(ret)
 
     def clangcomplete(self, filename, row, col, unsaved_files, membercomp):
         ret = None
@@ -628,6 +636,7 @@ class Cache:
             cache_disposeCompletionResults(comp)
         return ret
 
+
 class TranslationUnitCache(Worker):
     STATUS_PARSING      = 1
     STATUS_REPARSING    = 2
@@ -640,8 +649,9 @@ class TranslationUnitCache(Worker):
             self.cache = Cache(var, fn)
 
     def __init__(self):
+        workerthreadcount = get_setting("worker_threadcount", -1)
         self.as_super = super(TranslationUnitCache, self)
-        self.as_super.__init__()
+        self.as_super.__init__(workerthreadcount)
         self.translationUnits = LockedVariable({})
         self.parsingList = LockedVariable([])
         self.busyList = LockedVariable([])
@@ -762,42 +772,48 @@ class TranslationUnitCache(Worker):
     def reparse(self, view, filename, unsaved_files=[], on_done=None):
         ret = False
         pl = self.parsingList.lock()
-        if filename not in pl:
-            ret = True
-            pl.append(filename)
-            self.tasks.put((
-                self.task_reparse,
-                (filename, self.get_opts(view), self.get_opts_script(view), unsaved_files, on_done)))
-        self.parsingList.unlock()
+        try:
+            if filename not in pl:
+                ret = True
+                pl.append(filename)
+                self.tasks.put((
+                    self.task_reparse,
+                    (filename, self.get_opts(view), self.get_opts_script(view), unsaved_files, on_done)))
+        finally:
+            self.parsingList.unlock()
         return ret
 
     def add_ex(self, filename, opts, opts_script, on_done=None):
         tu = self.translationUnits.lock()
         pl = self.parsingList.lock()
-        if filename not in tu and filename not in pl:
-            pl.append(filename)
-            self.tasks.put((
-                self.task_parse,
-                (filename, opts, opts_script, on_done)))
-        self.translationUnits.unlock()
-        self.parsingList.unlock()
+        try:
+            if filename not in tu and filename not in pl:
+                pl.append(filename)
+                self.tasks.put((
+                    self.task_parse,
+                    (filename, opts, opts_script, on_done)))
+        finally:
+            self.translationUnits.unlock()
+            self.parsingList.unlock()
 
     def add(self, view, filename, on_done=None):
         ret = False
         tu = self.translationUnits.lock()
         pl = self.parsingList.lock()
-        if filename not in tu and filename not in pl:
-            ret = True
-            pl.append(filename)
-            self.tasks.put((
-                self.task_parse,
-                (filename, self.get_opts(view), self.get_opts_script(view), on_done)))
-        self.translationUnits.unlock()
-        self.parsingList.unlock()
+        try:
+            if filename not in tu and filename not in pl:
+                ret = True
+                pl.append(filename)
+                self.tasks.put((
+                    self.task_parse,
+                    (filename, self.get_opts(view), self.get_opts_script(view), on_done)))
+        finally:
+            self.translationUnits.unlock()
+            self.parsingList.unlock()
         return ret
 
     def get_opts_script(self, view):
-        return expand_path(get_setting("options_script", None, view), view.window())
+        return expand_path(get_setting("options_script", "", view), view.window())
 
     def get_opts(self, view):
         opts = get_path_setting("options", [], view)

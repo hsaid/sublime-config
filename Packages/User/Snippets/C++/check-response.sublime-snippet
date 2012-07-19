@@ -2,8 +2,9 @@
 	<content><![CDATA[
 if (${1:values}.size() != ${2:num})
 {
-	zwarn << __FUNCTION__ << "(" << __LINE__ << "): " << "${3:python_function} server response was malformed" << endl;
-	return;
+	zwarn << __FUNCTION__ << "(" << __LINE__ << "): " 
+		  << "${3:python_function} server response was malformed. Expected: $2. Got: " << ZVAR($1.size()) << endl;
+	${4:throw};
 }
 ]]></content>
 	<tabTrigger>check-response</tabTrigger>

@@ -18,8 +18,6 @@
 
 	{ "keys": ["ctrl+shift+a"], "command": "select_all" },
 
-	{ "keys": ["ctrl+h"], "command": "toggle_side_bar" },
-
 	// Copy/Paste/Etc Keys
 	{ "keys": ["ctrl+x", "ctrl+x"], "command": "cut" },
 	{ "keys": ["ctrl+shift+n"], "command": "new_file" },
@@ -50,5 +48,9 @@
 
 	// Formatting Keybinds
 	{ "keys": ["ctrl+k", "ctrl+d"], "command": "format_sql" },
-	{ "keys": ["ctrl+k", "ctrl+t"], "command": "unexpand_tabs" }
+	{ "keys": ["ctrl+k", "ctrl+t"], "command": "unexpand_tabs" },
+
+	// Expand selection
+	{ "keys": ["ctrl+h"], "command": "find_under_expand" },
+	{ "keys": ["ctrl+k", "ctrl+h"], "command": "find_under_expand_skip" }
 ]

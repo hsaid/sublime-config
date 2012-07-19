@@ -1,6 +1,5 @@
 <snippet>
 	<content><![CDATA[
-// No need to execute the SQL again - whip through the list view items instead.
 python::List ${1:invoices};
 QListViewItemIterator itr(${2:lsvInvoices});
 for (; itr.current(); ++itr)

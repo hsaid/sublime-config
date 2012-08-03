@@ -198,12 +198,19 @@ def extract_namespace(data):
         ret += match.group(1)
     if len(ret.strip()) == 0:
         ret = None
+    if ret == None:
+        data = remove_functions(data)
+        regex = re.compile(r"(\w+)::(\w+)::")
+        match = regex.search(data)
+        if match:
+            ret = match.group(1)
     return ret
 
 
 def extract_class_from_function(data):
     data = collapse_brackets(data)
     data = remove_functions(data)
+    data = remove_preprocessing(data)
     ret = None
     for match in re.finditer(r"(.*?)(\w+)::~?(\w+)\s*\([^);{}]*\)\s*(const)?[^{};]*\s*\{", data, re.MULTILINE):
         ret = match.group(2)
@@ -445,7 +452,7 @@ def get_var_type(data, var):
 
     if match and match.group(1):
         # Just so that it reports the correct location in the file
-        pat = r"(%s)([^%s],)*(%s)\s*(\(|\;|,|\)|=)" % (re.escape(match.group(1)), _invalid, re.escape(match.group(3)))
+        pat = r"(%s)([^%s],)*(%s)\s*(\[|\(|\;|,|\)|=)" % (re.escape(match.group(1)), _invalid, re.escape(match.group(3)))
         regex = re.compile(pat)
         for m in regex.finditer(origdata):
             match = m

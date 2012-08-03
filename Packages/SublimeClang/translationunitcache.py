@@ -331,7 +331,8 @@ class Cache:
                                     c.cursor.kind == cindex.CursorKind.TYPEDEF_DECL or \
                                     c.cursor.kind == cindex.CursorKind.CLASS_DECL or \
                                     c.cursor.kind == cindex.CursorKind.STRUCT_DECL or \
-                                    c.cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
+                                    c.cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL or \
+                                    c.cursor.kind == cindex.CursorKind.ENUM_DECL:
                                 ret.append((c.display, c.insert))
                         cache_disposeCompletionResults(comp)
             return ret
@@ -588,16 +589,7 @@ class Cache:
             if clazz == None:
                 clazz = extract_class(data)
             if clazz != None:
-                ns = extract_namespace(data)
-                c = None
-                if ns == None:
-                    c = cache_findType(self.cache, None, 0, clazz)
-                else:
-                    ns = ns.split("::")
-                    nsarg = (c_char_p * len(ns))()
-                    for i in range(len(ns)):
-                        nsarg[i] = ns[i]
-                    c = cache_findType(self.cache, nsarg, len(ns), clazz)
+                c = self.find_type(data, clazz)
                 if not c is None and not c.kind.is_invalid():
                     comp = cache_completeCursor(self.cache, c)
                     if comp:
@@ -803,10 +795,12 @@ class TranslationUnitCache(Worker):
         try:
             if filename not in tu and filename not in pl:
                 ret = True
+                opts = self.get_opts(view)
+                opts_script = self.get_opts_script(view)
                 pl.append(filename)
                 self.tasks.put((
                     self.task_parse,
-                    (filename, self.get_opts(view), self.get_opts_script(view), on_done)))
+                    (filename, opts, opts_script, on_done)))
         finally:
             self.translationUnits.unlock()
             self.parsingList.unlock()

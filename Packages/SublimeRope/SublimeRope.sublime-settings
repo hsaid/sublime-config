@@ -1,5 +1,7 @@
 {
     "suppress_word_completions": false,
     "suppress_explicit_completions": false,
-    "use_simple_completion": false
+    "use_simple_completion": false,
+    // non-trivial / nested modules have to be added with ".*", e.g. "numpy.*"
+    "autoimport_modules": []
 }

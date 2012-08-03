@@ -1,0 +1,7 @@
+<snippet>
+	<content><![CDATA[
+${1:menuPane}->addSpacer();
+]]></content>
+	<tabTrigger>menu-spacer</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

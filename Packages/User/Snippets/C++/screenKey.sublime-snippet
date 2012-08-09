@@ -1,0 +1,14 @@
+<snippet>
+	<content><![CDATA[
+QString ${1:ScreenName}::screenKey(const QString& id)
+{
+	if (id.isEmpty())
+	{
+		 return $1_scr::screenKey(id) + "new" + QString::number(int(this));
+	}
+	return $1_scr::screenKey(id) + id;
+}
+]]></content>
+	<tabTrigger>screenKey</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

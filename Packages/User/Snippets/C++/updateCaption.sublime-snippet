@@ -1,0 +1,15 @@
+<snippet>
+	<content><![CDATA[
+void ${1:ScreenName}::updateCaption()
+{
+	QString caption = "${2:Screen Title}";
+	if (zsql::isInt(_model.getRecord()))
+	{
+		caption += " (" + ${3:uniqueName} + ")";
+	}
+	ZScreen::setCaption(caption);
+}
+]]></content>
+	<tabTrigger>updateCaption</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

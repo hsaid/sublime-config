@@ -1,13 +1,14 @@
 {
 	"color_scheme": "Packages/Color Scheme - Default/Solarized (Dark).tmTheme",
-	"font": "PragmataPro Regular",
-	"font_size": 8,
+	"font_face": "Bitstream Vera Sans Mono",
+	"font_size": 7.5,
 	"highlight_modified_tabs": true,
 	"ignored_packages":
 	[
 		"SublimeClang",
 		"Vintage",
-		"SublimeRope"
+		"SublimeRope",
+		"BracketHighlighter"
 	],
 	"overlay_scroll_bars": "enabled"
 }

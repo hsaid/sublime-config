@@ -1,7 +1,8 @@
 {
-	"auto_upgrade_last_run": 1343166938,
+	"auto_upgrade_last_run": 1344455720,
 	"installed_packages":
 	[
+		"BracketHighlighter",
 		"DetectSyntax",
 		"Format SQL",
 		"Package Control",

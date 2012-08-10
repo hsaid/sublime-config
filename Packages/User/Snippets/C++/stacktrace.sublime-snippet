@@ -1,0 +1,7 @@
+<snippet>
+	<content><![CDATA[
+zdebug << ZStackTrace() << endl;
+]]></content>
+	<tabTrigger>stacktrace</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

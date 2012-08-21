@@ -1,0 +1,7 @@
+<snippet>
+	<content><![CDATA[
+LedsScript.core_settingsLookup("${1:financial}", "${2:setting}")
+]]></content>
+	<tabTrigger>setting</tabTrigger>
+	<scope>source.python</scope>
+</snippet>

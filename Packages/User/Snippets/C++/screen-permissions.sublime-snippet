@@ -3,6 +3,7 @@
 virtual QString readPermission()    { return "${1:financial_receipts}_read"; }
 virtual QString writePermission()   { return "$1_write"; }
 virtual QString deletePermission()  { return "$1_delete"; }
+virtual QString newPermission()		{ return ${2:writePermission()}; }
 ]]></content>
 	<tabTrigger>screen-permissions</tabTrigger>
 	<scope>source.c++</scope>

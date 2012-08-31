@@ -1,4 +1,4 @@
 .README.swp
 Settings/
 Backup/
-Packages/Default/*.cache
+*.cache

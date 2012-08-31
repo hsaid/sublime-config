@@ -1,0 +1,17 @@
+<snippet>
+	<content><![CDATA[
+parser = OptionParser(usage = "Usage: %prog [options]")
+parser.add_option("-H", "--host", dest = "host", default = "$1",
+				  help = "Database host.")
+parser.add_option("-d", "--database", dest = "database", default = "$2",
+				  help = "Database to use.")
+parser.add_option("-u", "--user", dest = "user", default = "$3",
+				  help = "Database user.")
+parser.add_option("-p", "--password", dest = "password", default = $4,
+				  help = "Database password.")
+$0
+options, args = parser.parse_args(sys.argv[1:])
+]]></content>
+	<tabTrigger>OptionParser</tabTrigger>
+	<scope>source.python</scope>
+</snippet>

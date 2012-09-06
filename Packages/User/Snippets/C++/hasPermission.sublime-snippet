@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-Core::hasPermission("${1:financial_post}", ${2:Core::currentAgenciesid()})$0
+Core::hasPermission("${1:perm}", ${2:Core::currentAgenciesid()})
 ]]></content>
 	<tabTrigger>hasPermission</tabTrigger>
 	<scope>source.c++</scope>

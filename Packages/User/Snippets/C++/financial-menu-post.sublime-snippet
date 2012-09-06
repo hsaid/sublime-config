@@ -18,6 +18,6 @@ if (!auto_post_source_documents)
 	}
 }
 ]]></content>
-	<tabTrigger>menu-post</tabTrigger>
+	<tabTrigger>financial-menu-post</tabTrigger>
 	<scope>source.c++</scope>
 </snippet>

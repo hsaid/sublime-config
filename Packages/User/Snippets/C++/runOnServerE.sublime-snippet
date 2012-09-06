@@ -1,8 +1,0 @@
-<snippet>
-	<content><![CDATA[
-${1:python::List} ${2:values} = python::runOnServerE("${3:financial.reports}", "${4:get_disbursement_report_data}",
-													python::List() << $6).${5:toList}();
-]]></content>
-	<tabTrigger>runOnServerE</tabTrigger>
-	<scope>source.c++</scope>
-</snippet>

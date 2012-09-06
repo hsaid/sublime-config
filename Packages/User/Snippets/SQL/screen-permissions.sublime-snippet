@@ -1,9 +1,0 @@
-<snippet>
-	<content><![CDATA[
-('$1 - Open', 'Allow viewing of $2', '$3_read'),
-('$1 - Edit', 'Allow creating and editing $2', '$3_write'),
-('$1 - Remove', 'Allow removing $2', '$3_delete'),
-]]></content>
-	<tabTrigger>screen-permissions</tabTrigger>
-	<scope>source.sql</scope>
-</snippet>

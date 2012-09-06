@@ -1,0 +1,7 @@
+<snippet>
+	<content><![CDATA[
+connect(${1:ztp}, SIGNAL(linkClicked(const QString&)), this, SLOT(${2:_handleLink}(const QString&)));
+]]></content>
+	<tabTrigger>connect-ztp</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

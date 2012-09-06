@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-Core::showScreen($1);$0
+Core::showScreen($1);
 ]]></content>
 	<tabTrigger>showscreen</tabTrigger>
 	<scope>source.c++</scope>

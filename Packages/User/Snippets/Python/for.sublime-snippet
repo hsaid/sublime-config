@@ -1,8 +1,0 @@
-<snippet>
-	<content><![CDATA[
-for ${var} in ${collection}:
-    $0
-]]></content>
-	<tabTrigger>for</tabTrigger>
-	<scope>source.python</scope>
-</snippet>

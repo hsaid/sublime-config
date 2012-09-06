@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-Core::intercom()->$1($2);
+Core::intercom()->${1:callFunction}($2);
 ]]></content>
 	<tabTrigger>intercom</tabTrigger>
 	<scope>source.c++</scope>

@@ -1,7 +1,7 @@
 <snippet>
 	<content><![CDATA[
 QStringList where_parts;
-where_parts << "${1:f}.active = TRUE"
+where_parts << "${1:f}.active"
 			<< "$1.owner_agenciesid = " + Core::currentAgenciesid()
 			<< "$1.financial_fundsid = " + _current_financial_fund_id;
 ]]></content>

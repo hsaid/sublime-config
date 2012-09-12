@@ -1,5 +1,5 @@
 {
-	"auto_upgrade_last_run": 1347296211,
+	"auto_upgrade_last_run": 1347389002,
 	"installed_packages":
 	[
 		"BracketHighlighter",
@@ -7,6 +7,7 @@
 		"Format SQL",
 		"Package Control",
 		"SublimeClang",
+		"SublimeREPL",
 		"SublimeRope"
 	]
 }

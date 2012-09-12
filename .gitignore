@@ -2,3 +2,5 @@
 Settings/
 Backup/
 *.cache
+
+Packages/User/SublimeREPLHistory

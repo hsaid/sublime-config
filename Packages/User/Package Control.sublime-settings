@@ -2,7 +2,6 @@
 	"auto_upgrade_last_run": 1347389002,
 	"installed_packages":
 	[
-		"BracketHighlighter",
 		"DetectSyntax",
 		"Format SQL",
 		"Package Control",

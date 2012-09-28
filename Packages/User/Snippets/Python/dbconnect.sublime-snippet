@@ -1,0 +1,8 @@
+<snippet>
+	<content><![CDATA[
+db_args = db.parse_connection_args(database="$1", user="$2", password=$3)
+db.psycopgconnect(**db_args)
+]]></content>
+	<tabTrigger>dbconnect</tabTrigger>
+	<scope>source.python</scope>
+</snippet>

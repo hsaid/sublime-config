@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-parser = OptionParser(usage = "Usage: %prog [options]")
+parser = OptionParser(usage = "%prog [options]")
 parser.add_option("-H", "--host", dest = "host", default = "$1",
 				  help = "Database host.")
 parser.add_option("-d", "--database", dest = "database", default = "$2",

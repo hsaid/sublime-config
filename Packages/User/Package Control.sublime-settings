@@ -2,12 +2,13 @@
 	"auto_upgrade_last_run": 1350583578,
 	"installed_packages":
 	[
-		"DetectSyntax",
 		"Format SQL",
 		"Package Control",
 		"SublimeClang",
 		"SublimeREPL",
 		"SublimeRope",
-		"Theme - Phoenix"
+		"SVN",
+		"Theme - Phoenix",
+		"Tortoise"
 	]
 }

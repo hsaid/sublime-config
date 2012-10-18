@@ -5,9 +5,8 @@
 	"highlight_modified_tabs": true,
 	"ignored_packages":
 	[
-		"Vintage",
 		"SublimeClang",
-		"Tortoise"
+		"Vintage"
 	],
 	"overlay_scroll_bars": "enabled",
 	"phoenix_color_green": true,

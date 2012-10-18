@@ -1,5 +1,5 @@
 {
-	"auto_upgrade_last_run": 1349272167,
+	"auto_upgrade_last_run": 1350583578,
 	"installed_packages":
 	[
 		"DetectSyntax",
@@ -7,6 +7,7 @@
 		"Package Control",
 		"SublimeClang",
 		"SublimeREPL",
-		"SublimeRope"
+		"SublimeRope",
+		"Theme - Phoenix"
 	]
 }

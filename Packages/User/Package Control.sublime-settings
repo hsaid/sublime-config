@@ -1,10 +1,11 @@
 {
-	"auto_upgrade_last_run": 1350583578,
+	"auto_upgrade_last_run": 1350661979,
 	"installed_packages":
 	[
 		"Format SQL",
 		"Package Control",
 		"SublimeClang",
+		"SublimeLinter",
 		"SublimeREPL",
 		"SublimeRope",
 		"Theme - Phoenix",

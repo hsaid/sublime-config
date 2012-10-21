@@ -1,2 +1,56 @@
 [
+	// Movement Keys
+	{ "keys": ["ctrl+n"], "command": "move", "args": {"by": "lines", "forward": true} },
+	{ "keys": ["ctrl+p"], "command": "move", "args": {"by": "lines", "forward": false} },
+	{ "keys": ["ctrl+f"], "command": "move", "args": {"by": "characters", "forward": true} },
+	{ "keys": ["ctrl+b"], "command": "move", "args": {"by": "characters", "forward": false} },
+	{ "keys": ["ctrl+e"], "command": "move_to", "args": {"to": "eol", "extend": false} },
+	{ "keys": ["ctrl+a"], "command": "move_to", "args": {"to": "bol", "extend": false} },
+	{ "keys": ["ctrl+d"], "command": "right_delete" },
+
+	{ "keys": ["ctrl+shift+n"], "command": "next_view" },
+	{ "keys": ["ctrl+shift+p"], "command": "prev_view" },
+	{ "keys": ["ctrl+right"], "command": "next_view" },
+	{ "keys": ["ctrl+left"], "command": "prev_view" },
+
+	{ "keys": ["alt+shift+,"], "command": "move_to", "args": {"to": "bof", "extend": false} },
+	{ "keys": ["alt+shift+."], "command": "move_to", "args": {"to": "eof", "extend": false} },
+
+	{ "keys": ["ctrl+shift+a"], "command": "select_all" },
+
+	// Copy/Paste/Etc Keys
+	{ "keys": ["ctrl+x", "ctrl+x"], "command": "cut" },
+	{ "keys": ["ctrl+shift+n"], "command": "new_file" },
+
+	// Save/Load/Etc Keys
+	{ "keys": ["ctrl+x", "ctrl+s"], "command": "save" },
+	{ "keys": ["ctrl+s"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":false} },
+	{ "keys": ["ctrl+r"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse":true} },
+
+	// Bookmark Keys
+	{ "keys": ["alt+shift+n"], "command": "next_bookmark" },
+	{ "keys": ["alt+shift+p"], "command": "prev_bookmark" },
+	{ "keys": ["alt+space"], "command": "toggle_bookmark" },
+	{ "keys": ["alt+shift+c"], "command": "clear_bookmarks" },
+
+	// Command Palette
+	{ "keys": ["ctrl+shift+space"], "command": "show_overlay", "args": {"overlay": "command_palette"} },
+
+	// Goto Keys
+	{ "keys": ["ctrl+x", "ctrl+f"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true} },
+	{ "keys": ["ctrl+x", "ctrl+r"], "command": "show_panel", "args": {"panel": "replace"} },
+
+	// Kill Keys
+	{ "keys": ["ctrl+k", "ctrl+k"], "command": "run_macro_file", "args": {"file": "Packages/Default/Delete to Hard EOL.sublime-macro"} },
+
+	// C++ keys
+	{ "keys": ["ctrl+o"], "command": "switch_file", "args": {"extensions": ["cpp", "cxx", "cc", "c", "hpp", "hxx", "h", "ipp", "inl", "m", "mm"]} },
+
+	// Formatting Keybinds
+	{ "keys": ["ctrl+k", "ctrl+d"], "command": "format_sql" },
+	{ "keys": ["ctrl+k", "ctrl+t"], "command": "unexpand_tabs" },
+
+	// Expand selection
+	{ "keys": ["ctrl+h"], "command": "find_under_expand" },
+	{ "keys": ["ctrl+k", "ctrl+h"], "command": "find_under_expand_skip" }
 ]

@@ -209,13 +209,13 @@ def extract_namespace(data):
             ret = match.group(1)
     return ret
 
-
 def extract_class_from_function(data):
-    data = collapse_brackets(data)
-    data = remove_functions(data)
     data = remove_preprocessing(data)
+    data = collapse_brackets(data)
+    data = collapse_parenthesis(data)
+    data = remove_functions(data)
     ret = None
-    for match in re.finditer(r"(.*?)(\w+)::~?(\w+)\s*\([^);{}]*\)\s*(const)?[^{};]*\s*\{", data, re.MULTILINE):
+    for match in re.finditer(r"(.*?)(\w+)::~?(\w+)\s*\(\)(\s+const)?[^{};]*\{", data, re.MULTILINE):
         ret = match.group(2)
 
     return ret
@@ -254,8 +254,12 @@ def remove_classes(data):
 
 
 def remove_functions(data):
-    regex = re.compile(r"([^\s;{}]+\s+)?[^\s;{}]+\s*\([^\)]*\)\s*(const)?[^;{]*\{\}", re.MULTILINE)
-    return regex.sub("", data)
+    regex = sub(r"""(?x)
+            (?:[^{};]+\s+)?
+            [^\s;{}]+\s*\([^)]*\)\s*        # function name + possible space + parenthesis
+            (?:const)?                      # Possibly a const function
+            [^;{]*\{\}""", data)
+    return regex
 
 
 def remove_namespaces(data):
@@ -340,6 +344,7 @@ def extract_variables(data):
     data = re.sub(r"\s*case\s+[\w:]*[^:]:[^:]", "", data, re.MULTILINE)
     data = re.sub(r"\s*default:\s*", "", data, re.MULTILINE)
     data = re.sub(r"template\s*<>", "", data, re.MULTILINE)
+    data = re.sub(r"\s{2,}", " ", data, re.MULTILINE)
 
     # first get any variables inside of the function declaration
     funcdata = ";".join(re.findall(r"\(([^)]+\))", data, re.MULTILINE))
@@ -355,7 +360,19 @@ def extract_variables(data):
     # Next, take care of all other variables
     data = collapse_parenthesis(data)
 
-    pattern = r"(^|,|\()\s*((static\s*)?(struct\s*)?\b(const\s*)?\b[^%s]+[\s*&]+(const)?[\s*&]*)(\b[^;()]+)\s*(?=%s)" % (_invalid, _endpattern)
+    pattern = r"""(?x)
+        (^|,|\(|;|\{)\s*
+            (
+                (static\s*)?
+                (struct\s*)?
+                \b(const\s*)?\b
+                [^%s]+
+                [\s*&]+
+                (const)?
+                [\s*&]*
+            )                   # type name
+            (\b[^;()]+)\s*      # variable name
+            (?=%s)""" % (_invalid, _endpattern)
     regex = re.compile(pattern, re.MULTILINE)
 
     for m in regex.finditer(data):

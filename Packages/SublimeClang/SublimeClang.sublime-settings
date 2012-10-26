@@ -263,6 +263,7 @@
     [
         "-isystem", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/usr/include/",
         "-isystem", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/usr/include/c++/4.2.1",
+        "-F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/",
         "-isystem", "C:\\MinGW\\lib\\gcc\\mingw32\\4.7.0\\include",
         "-isystem", "C:\\MinGW\\lib\\gcc\\mingw32\\4.7.0\\include\\c++",
         "-isystem", "C:\\MinGW\\lib\\gcc\\mingw32\\4.7.0\\include\\c++\\mingw32",
@@ -282,6 +283,9 @@
     // if scriptName.sh is present under the project's folders, will be executed as:
     // "/path/to/scriptName.sh someArgument1 someArgument2 currentViewFileName"
     // before each time a file needs to be parsed by clang.
+    //
+    // An example options script for loading the exact compilation commands from
+    // a CMake json database is available at https://gist.github.com/3944250.
     "options_script": "",
 
     // If set to true, it'll not prepend the compiler options with the path to the
@@ -321,5 +325,8 @@
     // All diagnostic errors from files in these directories or below will be ignored
     "diagnostic_ignore_dirs":
     [
-    ]
+    ],
+
+    // Diagnostic errors/warnings matching this regex pattern will be ignored
+    "diagnostic_ignore_regex": "pragma once in main file"
 }

@@ -117,9 +117,10 @@ class ClangGoBackEventListener(sublime_plugin.EventListener):
             return
         # If the view we just closed was last in the navigation_stack,
         # consider it "popped" from the stack
-        fn = view.file_name().encode("utf-8")
+        fn = view.file_name()
         if fn == None:
             return
+        fn = fn.encode("utf-8")
         while True:
             if len(navigation_stack) == 0 or \
                     not navigation_stack[
@@ -318,6 +319,14 @@ class ExtensiveSearch:
             import traceback
             traceback.print_exc()
 
+def get_cursor_spelling(cursor):
+    cursor_spelling = None
+    if not cursor is None:
+        cursor_spelling = cursor.spelling or cursor.displayname
+        cursor_spelling = re.sub(r"^(enum\s+|(class|struct)\s+(\w+::)*)", "", cursor_spelling)
+    return cursor_spelling
+
+
 class ClangGotoImplementation(sublime_plugin.TextCommand):
 
     def run(self, edit):
@@ -333,7 +342,8 @@ class ClangGotoImplementation(sublime_plugin.TextCommand):
             cursor = cindex.Cursor.get(tu.var, view.file_name().encode("utf-8"),
                                        row + 1, col + 1)
             spelling = view.substr(view.word(view.sel()[0].a))
-            if cursor is None or cursor.kind.is_invalid() or cursor.displayname != spelling:
+            cursor_spelling = get_cursor_spelling(cursor)
+            if cursor is None or cursor.kind.is_invalid() or cursor_spelling != spelling:
                 ExtensiveSearch(None, spelling, self.view, self.view.window())
                 return
             d = cursor.get_definition()
@@ -403,7 +413,6 @@ class ClangGotoImplementation(sublime_plugin.TextCommand):
     def is_visible(self):
         return is_supported_language(sublime.active_window().active_view())
 
-
 class ClangGotoDef(sublime_plugin.TextCommand):
     def quickpanel_on_done(self, idx):
         if idx == -1:
@@ -428,7 +437,8 @@ class ClangGotoDef(sublime_plugin.TextCommand):
 
             word = view.word(view.sel()[0].a)
             spelling = view.substr(word)
-            if cursor is None or cursor.kind.is_invalid() or (cursor.displayname != spelling and cursor.kind != cindex.CursorKind.INCLUSION_DIRECTIVE):
+            cursor_spelling = get_cursor_spelling(cursor)
+            if cursor is None or cursor.kind.is_invalid() or (cursor_spelling != spelling and cursor.kind != cindex.CursorKind.INCLUSION_DIRECTIVE):
                 # Try to determine what we're supposed to be looking for
                 data = view.substr(sublime.Region(0, view.line(view.sel()[0].a).end()))
                 chars = r"[\[\]\(\)&|.+-/*,<>;]"
@@ -540,6 +550,7 @@ def display_compilation_results(view):
     errorCount = 0
     warningCount = 0
     ignoreDirs = [os.path.abspath(os.path.normpath(os.path.normcase(d))) for d in get_setting("diagnostic_ignore_dirs", [], view)]
+    ignore_regex = re.compile(get_setting("diagnostic_ignore_regex"))
     try:
         if len(tu.var.diagnostics):
             errString = ""
@@ -555,6 +566,10 @@ def display_compilation_results(view):
                 err = "%s:%d,%d - %s - %s" % (filename, f.line, f.column,
                                               diag.severityName,
                                               diag.spelling)
+
+                if ignore_regex.search(err):
+                    continue
+
                 try:
                     if len(diag.disable_option) > 0:
                         err = "%s [Disable with %s]" % (err, diag.disable_option)
@@ -611,7 +626,7 @@ def is_member_completion(view, caret):
     if member_regex.search(line) != None:
         return True
     elif get_language(view).startswith("objc"):
-        return re.search(r"\[[\s\w\]]+\s+$", line) != None
+        return re.search(r"\[[\.\->\s\w\]]+\s+$", line) != None
     return False
 
 
@@ -621,7 +636,7 @@ class ClangComplete(sublime_plugin.TextCommand):
             self.view.insert(edit, region.end(), characters)
         caret = self.view.sel()[0].begin()
         line = self.view.substr(sublime.Region(self.view.word(caret-1).a, caret))
-        if is_member_completion(self.view, caret) or line.endswith("::"):
+        if is_member_completion(self.view, caret) or line.endswith("::") or re.search("(^|\W)new\s+\w*$", line):
             self.view.run_command("hide_auto_complete")
             sublime.set_timeout(self.delayed_complete, 1)
 
@@ -664,7 +679,8 @@ class SublimeClangAutoComplete(sublime_plugin.EventListener):
 
     def on_query_completions(self, view, prefix, locations):
         global clang_complete_enabled
-        if not is_supported_language(view) or not clang_complete_enabled:
+        if not is_supported_language(view) or not clang_complete_enabled or \
+                not view.match_selector(locations[0], '-string -comment -constant'):
             return []
 
         line = view.substr(sublime.Region(view.line(locations[0]).begin(), locations[0]))

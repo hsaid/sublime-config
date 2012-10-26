@@ -162,6 +162,7 @@ void get_return_type(std::string& returnType, CXCursorKind ck)
         case CXCursor_NamespaceAlias:    // fall through
         case CXCursor_Namespace:         returnType = "namespace"; break;
         case CXCursor_TypedefDecl:       returnType = "typedef";   break;
+        case CXCursor_Constructor:       returnType = "constructor"; break;
     }
 }
 
@@ -413,7 +414,7 @@ void trim(EntryList& mEntries)
     // Trim duplicates
     if (mEntries.begin() == mEntries.end())
         return;
-    for (EntryList::iterator i = mEntries.begin()+1; i < mEntries.end(); i++)
+    for (EntryList::iterator i = mEntries.begin()+1; i < mEntries.end(); )
     {
         while (i != mEntries.end() && (*(*i)) == (*(*(i-1))))
         {
@@ -434,6 +435,15 @@ void trim(EntryList& mEntries)
             {
                 i = mEntries.begin();
             }
+            i++;
+        }
+#if _WIN32
+        // MSVC asserts if you i++ past the end of the vector.
+        // In this case it's just an overzealous assert as we won't
+        // be reading from it. Issue #143
+        if (i < mEntries.end())
+#endif
+        {
             i++;
         }
     }
@@ -529,7 +539,7 @@ public:
     void visit_children(CXCursor cursor)
     {
         clang_visitChildren(cursor, get_completion_children, this);
-        for (CursorList::iterator i = mAnonymousStructs.begin(); i < mAnonymousStructs.end(); i++)
+        for (CursorList::iterator i = mAnonymousFields.begin(); i < mAnonymousFields.end(); i++)
         {
             CompletionVisitorData d(entries, access, isBaseClass);
             d.visit_children(*i);
@@ -557,10 +567,10 @@ public:
             case CXCursor_UnexposedDecl: // extern "C" for example
                 recurse = true;
                 break;
-            case CXCursor_UnionDecl:
             case CXCursor_EnumDecl:
                 recurse = true;
                 // fall through
+            case CXCursor_UnionDecl:
             case CXCursor_Namespace:
             case CXCursor_ObjCInterfaceDecl:
             case CXCursor_ObjCIvarDecl:
@@ -579,16 +589,17 @@ public:
             case CXCursor_VarDecl:
             case CXCursor_NamespaceAlias:
             case CXCursor_MacroDefinition:
+            case CXCursor_Constructor:
             {
                 std::string ins;
                 std::string disp;
                 parse_res(ins, disp, cursor);
                 if (ins.length() != 0)
                     entries.push_back(new Entry(cursor, disp, ins, access, isBaseClass));
-                else if (ck == CXCursor_StructDecl)
+                else if (ck == CXCursor_StructDecl || ck == CXCursor_UnionDecl)
                 {
-                    // Might be an anonymous struct whose children we need to add later
-                    mAnonymousStructs.push_back(cursor);
+                    // Might be an anonymous struct or union whose children we need to add later
+                    mAnonymousFields.push_back(cursor);
                 }
                 switch (ck)
                 {
@@ -598,13 +609,15 @@ public:
                     {
                         CXCursor child = clang_getNullCursor();
                         clang_visitChildren(cursor, get_first_child_visitor, &child);
-                        if (!clang_Cursor_isNull(child) && clang_getCursorKind(child) == CXCursor_StructDecl)
+                        if (!clang_Cursor_isNull(child) &&
+                            (clang_getCursorKind(child) == CXCursor_StructDecl ||
+                             clang_getCursorKind(child) == CXCursor_UnionDecl))
                         {
-                            for (CursorList::iterator i = mAnonymousStructs.begin(); i < mAnonymousStructs.end(); i++)
+                            for (CursorList::iterator i = mAnonymousFields.begin(); i < mAnonymousFields.end(); i++)
                             {
                                 if (clang_equalCursors(child, *i))
                                 {
-                                    mAnonymousStructs.erase(i);
+                                    mAnonymousFields.erase(i);
                                     break;
                                 }
                             }
@@ -622,8 +635,34 @@ public:
     CX_CXXAccessSpecifier access;
     bool                  isBaseClass;
 
+    void addConstructors(CXCursor cursor, CXCursorKind ck)
+    {
+        switch (ck)
+        {
+            case CXCursor_ClassTemplate:
+            case CXCursor_StructDecl:
+            case CXCursor_ClassDecl:
+            {
+                CursorList children;
+                EntryList e;
+                CompletionVisitorData d(e, access);
+                d.visit_children(cursor);
+                for (EntryList::iterator i = e.begin(); i < e.end(); i++)
+                {
+                    Entry *entry = *i;
+                    if (clang_getCursorKind(entry->cursor) == CXCursor_Constructor && entry->access == CX_CXXPublic)
+                        entries.push_back(new Entry(*entry));
+                }
+                break;
+            }
+            default: break;
+        }
+    }
+
+
 private:
-    CursorList            mAnonymousStructs;
+    CursorList            mAnonymousFields;
+
 
     static CXChildVisitResult get_completion_children(CXCursor cursor, CXCursor parent, CXClientData client_data)
     {
@@ -660,6 +699,7 @@ private:
             }
             default: break;
         }
+        data->addConstructors(cursor, ck);
 
         if (recurse)
         {
@@ -757,6 +797,7 @@ public:
         {
             CompletionVisitorData d(mEntries, CX_CXXPublic);
             d.add_completion_children(cursor, ck, recurse);
+            d.addConstructors(cursor, ck);
         }
 
         return false;
@@ -1188,6 +1229,11 @@ EXPORT Cache* createCache(CXCursor base)
 EXPORT void deleteCache(Cache *cache)
 {
     delete cache;
+}
+
+EXPORT const char* getVersion()
+{
+    return SUBLIMECLANG_VERSION;
 }
 
 }

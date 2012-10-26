@@ -1,0 +1,9 @@
+<snippet>
+	<content><![CDATA[
+SELECT pg_terminate_backend(procpid)
+FROM pg_stat_activity
+WHERE datname ILIKE '$1';
+]]></content>
+	<tabTrigger>kill-connections</tabTrigger>
+	<scope>source.sql</scope>
+</snippet>

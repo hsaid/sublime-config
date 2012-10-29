@@ -12,6 +12,7 @@ import os
 import os.path
 import buzhug
 import re
+import sublimerepl_build_system_hack
 
 PLATFORM = sublime.platform().lower()
 SETTINGS_FILE = 'SublimeREPL.sublime-settings'
@@ -148,20 +149,19 @@ class ReplView(object):
             view.set_syntax_file(syntax)
         self._output_end = view.size()
 
-        view.settings().set("repl_external_id", repl.external_id)
-        view.settings().set("repl_id", repl.id)
-        view.settings().set("repl", True)
-        view.settings().set("translate_tabs_to_spaces", False)
-        view.settings().set("auto_indent", False)
-        view.settings().set("smart_indent", False)
-        view.settings().set("indent_subsequent_lines", False)
-        view.settings().set("detect_indentation", False)
-        view.settings().set("auto_complete", False)
-
         self._repl_reader = ReplReader(repl)
         self._repl_reader.start()
 
         settings = sublime.load_settings(SETTINGS_FILE)
+
+        view.settings().set("repl_external_id", repl.external_id)
+        view.settings().set("repl_id", repl.id)
+        view.settings().set("repl", True)
+
+        rv_settings = settings.get("repl_view_settings", {})
+        for setting, value in rv_settings.items():
+            view.settings().set(setting, value)
+
         view.settings().set("history_arrows", settings.get("history_arrows", True))
 
         if self.external_id and settings.get("presistent_history_enabled"):
@@ -458,6 +458,11 @@ class ReplManager(object):
             res["folder"] = window.folders()[0]
         else:
             res["folder"] = res["file_path"]
+
+        if sublime.load_settings(SETTINGS_FILE).get("use_build_system_hack", False):
+            project_settings = sublimerepl_build_system_hack.get_project_settings(window)
+            res.update(project_settings)
+
         return res
 
     @staticmethod

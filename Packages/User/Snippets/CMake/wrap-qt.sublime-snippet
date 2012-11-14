@@ -1,0 +1,8 @@
+<snippet>
+	<content><![CDATA[
+qt_wrap_cpp(${1:project} MOC_HEADERS \${${2:HEADERS}})
+qt_wrap_ui($1 GUI_HEADERS GUI_SOURCES \${${3:FORMS}})
+]]></content>
+	<tabTrigger>wrap-qt</tabTrigger>
+	<scope>source.cmake</scope>
+</snippet>

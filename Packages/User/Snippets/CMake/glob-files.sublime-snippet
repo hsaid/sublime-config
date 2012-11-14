@@ -1,0 +1,9 @@
+<snippet>
+	<content><![CDATA[
+file(${1:GLOB} SOURCES RELATIVE \${CMAKE_CURRENT_SOURCE_DIR} ${2:*.cpp})
+file($1 HEADERS RELATIVE \${CMAKE_CURRENT_SOURCE_DIR} ${3:*.h})
+file($1 FORMS RELATIVE \${CMAKE_CURRENT_SOURCE_DIR} ${4:*.ui})
+]]></content>
+	<tabTrigger>glob-files</tabTrigger>
+	<scope>source.cmake</scope>
+</snippet>

@@ -1,0 +1,12 @@
+<snippet>
+	<content><![CDATA[
+cmake_minimum_required (VERSION ${1:2.8.8})
+project ($2)
+
+include_directories(\${CMAKE_CURRENT_BINARY_DIR})
+
+include(../Config.txt)
+]]></content>
+	<tabTrigger>header</tabTrigger>
+	<scope>source.cmake</scope>
+</snippet>

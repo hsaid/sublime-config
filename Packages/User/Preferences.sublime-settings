@@ -6,7 +6,8 @@
 	"ignored_packages":
 	[
 		"SublimeClang",
-		"Vintage"
+		"Vintage",
+		"SublimeLinter"
 	],
 	"overlay_scroll_bars": "enabled",
 	"phoenix_color_green": true,

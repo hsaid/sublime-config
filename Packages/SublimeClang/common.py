@@ -35,7 +35,11 @@ try:
 
 
     def error_message(msg):
-        sublime.error_message(msg)
+        # Work around for http://www.sublimetext.com/forum/viewtopic.php?f=3&t=9825
+        if sublime.active_window() == None:
+            sublime.set_timeout(lambda: error_message(msg), 500)
+        else:
+            sublime.error_message(msg)
 
     language_regex = re.compile("(?<=source\.)[\w+#]+")
 
@@ -108,6 +112,10 @@ try:
         value = value.replace('\\', '/')
 
         return value
+
+    def display_user_selection(options, callback):
+        sublime.active_window().show_quick_panel(options, callback)
+
 except:
     # Just used for unittesting
 
@@ -128,6 +136,9 @@ except:
 
     def expand_path(value, window):
         return value
+
+    def display_user_selection(options, callback):
+        callback(0)
 
 
 class LockedVariable:

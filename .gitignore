@@ -4,3 +4,5 @@ Backup/
 *.cache
 
 Packages/User/SublimeREPLHistory
+Packages/SublimeLinter/sublimelinter/.tempfiles
+

@@ -72,7 +72,7 @@
         with the outline color, and "none" disables all outline styles
         (useful if "sublimelinter_gutter_marks" is set).
     */
-    "sublimelinter_mark_style": "none",
+    "sublimelinter_mark_style": "none", 
 
     /*
         If true, lines with errors or warnings will be filled in with the

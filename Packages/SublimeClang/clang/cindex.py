@@ -895,9 +895,13 @@ class Cursor(Structure):
     _fields_ = [("_kind_id", c_int), ("xdata", c_int), ("data", c_void_p * 3)]
 
     def __eq__(self, other):
+        if other is None:
+            return Cursor_eq(self, Cursor_null())
         return Cursor_eq(self, other)
 
     def __ne__(self, other):
+        if other is None:
+            return not Cursor_eq(self, Cursor_null())
         return not Cursor_eq(self, other)
 
     def is_definition(self):
@@ -1091,8 +1095,11 @@ class Cursor(Structure):
                 _child.data = child[0].data
                 children.append(_child)
             else:
-                assert child != Cursor_null()
-                children.append(child)
+                try:
+                    assert child != Cursor_null()
+                    children.append(child)
+                except:
+                    pass
             return 1 # continue
         children = []
         Cursor_visit(self, Cursor_visit_callback(visitor), children)
@@ -1115,7 +1122,9 @@ class Cursor(Structure):
                 children = self.get_children()
                 if len(children) == 1 and children[0].kind == CursorKind.TYPE_REF:
                     ref = children[0].get_reference()
-                    return ret + ref.get_returned_pointer_level()
+                    if ref != self:
+                        return ret + ref.get_returned_pointer_level()
+                    return ret
 
                 if self.kind == CursorKind.TYPEDEF_DECL:
                     for child in children:

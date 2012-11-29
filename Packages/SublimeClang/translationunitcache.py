@@ -69,17 +69,25 @@ See http://github.com/quarnster/SublimeClang for more details.
 class CacheEntry(Structure):
     _fields_ = [("cursor", cindex.Cursor), ("insert", c_char_p), ("display", c_char_p), ("access", c_uint), ("static", c_bool), ("baseclass", c_bool)]
 
+class _Cache(Structure):
+    def __del__(self):
+        _deleteCache(self)
 
 class CacheCompletionResults(Structure):
-    _fields_ = [("entries", POINTER(POINTER(CacheEntry))), ("length", c_uint)]
+    @property
+    def length(self):
+        return self.__len__()
 
     def __len__(self):
-        return self.length
+        return completionResults_length(self)
 
     def __getitem__(self, key):
         if key >= self.length:
             raise IndexError
-        return self.entries[key][0]
+        return completionResults_getEntry(self, key)[0]
+
+    def __del__(self):
+        completionResults_dispose(self)
 
 
 cachelib = get_cache_library()
@@ -101,26 +109,32 @@ except:
     error_message("Your SublimeClang libcache is out of date. Try restarting ST2 and if that fails, uninstall SublimeClang, restart ST2 and install it again.")
 
 _createCache = cachelib.createCache
-_createCache.restype = c_void_p
+_createCache.restype = POINTER(_Cache)
 _createCache.argtypes = [cindex.Cursor]
 _deleteCache = cachelib.deleteCache
-_deleteCache.argtypes = [c_void_p]
+_deleteCache.argtypes = [POINTER(_Cache)]
 cache_completeNamespace = cachelib.cache_completeNamespace
-cache_completeNamespace.argtypes = [c_void_p, POINTER(c_char_p), c_uint]
+cache_completeNamespace.argtypes = [POINTER(_Cache), POINTER(c_char_p), c_uint]
 cache_completeNamespace.restype = POINTER(CacheCompletionResults)
 cache_complete_startswith = cachelib.cache_complete_startswith
-cache_complete_startswith.argtypes = [c_void_p, c_char_p]
+cache_complete_startswith.argtypes = [POINTER(_Cache), c_char_p]
 cache_complete_startswith.restype = POINTER(CacheCompletionResults)
-cache_disposeCompletionResults = cachelib.cache_disposeCompletionResults
-cache_disposeCompletionResults.argtypes = [POINTER(CacheCompletionResults)]
+completionResults_length = cachelib.completionResults_length
+completionResults_length.argtypes = [POINTER(CacheCompletionResults)]
+completionResults_length.restype = c_uint
+completionResults_getEntry = cachelib.completionResults_getEntry
+completionResults_getEntry.argtypes = [POINTER(CacheCompletionResults)]
+completionResults_getEntry.restype = POINTER(CacheEntry)
+completionResults_dispose = cachelib.completionResults_dispose
+completionResults_dispose.argtypes = [POINTER(CacheCompletionResults)]
 cache_findType = cachelib.cache_findType
-cache_findType.argtypes = [c_void_p, POINTER(c_char_p), c_uint, c_char_p]
+cache_findType.argtypes = [POINTER(_Cache), POINTER(c_char_p), c_uint, c_char_p]
 cache_findType.restype = cindex.Cursor
 cache_completeCursor = cachelib.cache_completeCursor
-cache_completeCursor.argtypes = [c_void_p, cindex.Cursor]
+cache_completeCursor.argtypes = [POINTER(_Cache), cindex.Cursor]
 cache_completeCursor.restype = POINTER(CacheCompletionResults)
 cache_clangComplete = cachelib.cache_clangComplete
-cache_clangComplete.argtypes = [c_void_p, c_char_p, c_uint, c_uint, POINTER(cindex._CXUnsavedFile), c_uint, c_bool]
+cache_clangComplete.argtypes = [POINTER(_Cache), c_char_p, c_uint, c_uint, POINTER(cindex._CXUnsavedFile), c_uint, c_bool]
 cache_clangComplete.restype = POINTER(CacheCompletionResults)
 
 
@@ -139,15 +153,14 @@ def remove_duplicates(data):
 
 class Cache:
     def __init__(self, tu, filename):
-        self.cache = _createCache(tu.cursor)
-        if self.cache == None:
-            raise Exception("cache is None")
+        self.cache = _createCache(tu.cursor)[0]
+        assert self.cache != None
         self.tu = tu
         self.filename = filename
 
     def __del__(self):
-        if self.cache:
-            _deleteCache(self.cache)
+        self.tu = None
+        self.cache = None
 
     def get_native_namespace(self, namespace):
         nsarg = (c_char_p*len(namespace))()
@@ -162,12 +175,11 @@ class Cache:
             comp = cache_completeNamespace(self.cache, nsarg, len(nsarg))
             if comp:
                 ret = [(x.display, x.insert) for x in comp[0]]
-                cache_disposeCompletionResults(comp)
         return ret
 
     def get_namespace_from_cursor(self, cursor):
         namespace = []
-        while not cursor is None and cursor.kind == cindex.CursorKind.NAMESPACE:
+        while cursor != None and cursor.kind == cindex.CursorKind.NAMESPACE:
             namespace.insert(0, cursor.displayname)
             cursor = cursor.get_lexical_parent()
         return namespace
@@ -196,34 +208,21 @@ class Cache:
                 nsarg = self.get_native_namespace(ns.split("::"))
                 nslen = len(nsarg)
             cursor = cache_findType(self.cache, nsarg, nslen, typename)
-            if not cursor is None and not cursor.kind.is_invalid():
+            if cursor != None and not cursor.kind.is_invalid():
                 if cursor.kind.is_reference():
                     cursor = cursor.get_referenced()
                 break
 
-        if (not cursor is None and not cursor.kind.is_invalid()) or idx == -1:
+        if (cursor != None and not cursor.kind.is_invalid()) or idx == -1:
             return cursor
 
         # Maybe it's a subtype?
         parent = self.find_type(data, extra)
-        if not parent is None and not parent.kind.is_invalid():
-            if parent.kind == cindex.CursorKind.NAMESPACE_ALIAS:
-                children = parent.get_children()
-                curr = children[len(children)-1].get_reference()
-                namespace = self.get_namespace_from_cursor(curr)
-                namespace.append(typename)
-                return self.find_type(data, "::".join(namespace))
+        if parent != None and not parent.kind.is_invalid():
             for child in parent.get_children():
                 if child.kind.is_declaration() and child.spelling == typename:
                     return child
         return None
-
-    def get_template_type_count(self, temp):
-        ret = []
-        for child in temp.get_children():
-            if child.kind == cindex.CursorKind.TEMPLATE_TYPE_PARAMETER:
-                ret.append(child)
-        return len(ret)
 
     def solve_template_from_cursor(self, temp, member, template):
         found = False
@@ -231,7 +230,7 @@ class Cache:
         for child in member.get_children():
             if not found:
                 ref = child.get_reference()
-                if not ref is None and ref == temp:
+                if ref != None and ref == temp:
                     found = True
                 continue
             if child.kind == cindex.CursorKind.TEMPLATE_REF:
@@ -245,11 +244,11 @@ class Cache:
     def solve_member(self, data, typecursor, member, template):
         temp = None
         pointer = 0
-        if not member is None and not member.kind.is_invalid():
+        if member != None and not member.kind.is_invalid():
             temp = member.get_returned_cursor()
             pointer = member.get_returned_pointer_level()
 
-            if not temp is None and not temp.kind.is_invalid():
+            if temp != None and not temp.kind.is_invalid():
                 if temp.kind == cindex.CursorKind.TEMPLATE_TYPE_PARAMETER:
                     off = 0
                     for child in typecursor.get_children():
@@ -269,7 +268,7 @@ class Cache:
         return temp, template, pointer
 
     def inherits(self, parent, child):
-        if child is None or child.kind.is_invalid():
+        if child == None or child.kind.is_invalid():
             return False
         if parent == child:
             return True
@@ -320,11 +319,11 @@ class Cache:
                 ret = None
                 cached_results = cache_complete_startswith(self.cache, prefix)
                 if cached_results:
+                    ret = []
                     for x in cached_results[0]:
                         if x.cursor.kind != cindex.CursorKind.MACRO_DEFINITION and \
                                 x.cursor.kind != cindex.CursorKind.CXX_METHOD:
                             ret.append((x.display, x.insert))
-                    cache_disposeCompletionResults(cached_results)
                 return ret
             before = match.group(1)
             namespace = before.split("::")
@@ -334,26 +333,19 @@ class Cache:
             if len(ret) == 0:
                 typename = "::".join(namespace)
                 c = self.find_type(data, typename)
-                if not c is None:
+                if c != None:
                     if c.kind == cindex.CursorKind.ENUM_DECL:
                         # It's not valid to complete enum::
                         c = None
-                    elif c.kind == cindex.CursorKind.NAMESPACE_ALIAS:
-                        children = c.get_children()
-
-                        curr = children[len(children)-1].get_reference()
-                        namespace = self.get_namespace_from_cursor(curr)
-                        ret = self.complete_namespace(namespace)
-                        c = None
-                if not c is None and not c.kind.is_invalid() and c.kind != cindex.CursorKind.NAMESPACE:
+                if c != None and not c.kind.is_invalid() and c.kind != cindex.CursorKind.NAMESPACE:
                     # It's going to be a declaration of some kind, so
                     # get the returned cursor
                     c = c.get_returned_cursor()
-                    if not c is None and c.kind == cindex.CursorKind.TYPEDEF_DECL:
+                    if c != None and c.kind == cindex.CursorKind.TYPEDEF_DECL:
                         # Too complex typedef to be able to complete, fall back to slow completions
                         c = None
                         ret = None
-                if not c is None and not c.kind.is_invalid():
+                if c != None and not c.kind.is_invalid():
                     if c.kind == cindex.CursorKind.NAMESPACE:
                         namespace = self.get_namespace_from_cursor(c)
                         return self.complete_namespace(namespace)
@@ -380,7 +372,6 @@ class Cache:
                                     c.cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL or \
                                     c.cursor.kind == cindex.CursorKind.ENUM_DECL:
                                 ret.append((c.display, c.insert))
-                        cache_disposeCompletionResults(comp)
             ret = self.filter(ret, constr)
             return ret
         elif re.search(r"(\w+\]+\s+$|\[[\w\.\-\>]+\s+$|([^ \t]+)(\.|\->)$)", before):
@@ -399,25 +390,25 @@ class Cache:
             if var == "this":
                 pointer = 1
 
-            if not var is None:
+            if var != None:
                 if line > 0 and column > 0:
                     cursor = cindex.Cursor.get(self.tu, self.filename, line, column)
-                if cursor is None or cursor.kind.is_invalid() or cursor.spelling != var:
+                if cursor == None or cursor.kind.is_invalid() or cursor.spelling != var:
                     cursor = self.find_type(data, template[0])
                 else:
                     pointer = 0  # get the pointer level from the cursor instead
-                if not cursor is None and not cursor.kind.is_invalid() and \
+                if cursor != None and not cursor.kind.is_invalid() and \
                         cursor.spelling == typename and \
                         cursor.kind == cindex.CursorKind.VAR_DECL:
                     # We're trying to use a variable as a type.. This isn't valid
                     cursor = None
                     ret = []
-                if not cursor is None and not cursor.kind.is_invalid():
+                if cursor != None and not cursor.kind.is_invalid():
                     # It's going to be a declaration of some kind, so
                     # get the returned cursor
                     pointer += cursor.get_returned_pointer_level()
                     cursor = cursor.get_returned_cursor()
-                    if cursor is None:
+                    if cursor == None:
                         ret = []
             else:
                 # Probably a member of the current class
@@ -426,19 +417,19 @@ class Cache:
                     clazz = extract_class(data)
                 if clazz != None:
                     cursor = self.find_type(data, clazz)
-                    if not cursor is None and not cursor.kind.is_invalid():
+                    if cursor != None and not cursor.kind.is_invalid():
                         func = False
                         if typename.endswith("()"):
                             func = True
                             typename = typename[:-2]
                         member = cursor.get_member(typename, func)
                         cursor, template, pointer = self.solve_member(data, cursor, member, template)
-                        if not member is None and (cursor is None or cursor.kind.is_invalid()):
+                        if member != None and (cursor == None or cursor.kind.is_invalid()):
                             ret = []
-                if cursor is None or cursor.kind.is_invalid():
+                if cursor == None or cursor.kind.is_invalid():
                     # Is it by any chance a struct variable or an ObjC class?
                     cursor = self.find_type(data, template[0])
-                    if cursor is None or cursor.kind.is_invalid() or \
+                    if cursor == None or cursor.kind.is_invalid() or \
                             cursor.spelling != typename or \
                             (not tocomplete.startswith("::") and \
                                 cursor.kind != cindex.CursorKind.VAR_DECL and \
@@ -449,14 +440,14 @@ class Cache:
                                      cursor.kind == cindex.CursorKind.OBJC_INTERFACE_DECL or \
                                      cursor.kind == cindex.CursorKind.CLASS_TEMPLATE)):
                         cursor = None
-                    if not cursor is None and not cursor.kind.is_invalid():
+                    if cursor != None and not cursor.kind.is_invalid():
                         # It's going to be a declaration of some kind, so
                         # get the returned cursor
                         pointer = cursor.get_returned_pointer_level()
                         cursor = cursor.get_returned_cursor()
-                        if cursor is None:
+                        if cursor == None:
                             ret = []
-                if cursor is None or cursor.kind.is_invalid():
+                if cursor == None or cursor.kind.is_invalid():
                     # Is it a non-member function?
                     func = False
                     if typename.endswith("()"):
@@ -471,23 +462,22 @@ class Cache:
                                     cursor = x.cursor
                                     pointer = cursor.get_returned_pointer_level()
                                     cursor = cursor.get_returned_cursor()
-                                    if cursor is None:
+                                    if cursor == None:
                                         ret = []
                                     break
-                        cache_disposeCompletionResults(cached_results)
 
-            if not cursor is None and not cursor.kind.is_invalid():
+            if cursor != None and not cursor.kind.is_invalid():
                 r = cursor
                 m2 = None
                 count = 0
                 while len(tocomplete) and count < 10:
-                    if r is None or \
+                    if r == None or \
                             not (r.kind == cindex.CursorKind.CLASS_DECL or \
                             r.kind == cindex.CursorKind.STRUCT_DECL or \
                             r.kind == cindex.CursorKind.UNION_DECL or \
                             r.kind == cindex.CursorKind.OBJC_INTERFACE_DECL or \
                             r.kind == cindex.CursorKind.CLASS_TEMPLATE):
-                        if not r is None and not (r.kind == cindex.CursorKind.TEMPLATE_TYPE_PARAMETER or \
+                        if r != None and not (r.kind == cindex.CursorKind.TEMPLATE_TYPE_PARAMETER or \
                                              (r.kind == cindex.CursorKind.TYPEDEF_DECL and len(r.get_children()))):
                             ret = []
                         r = None
@@ -521,13 +511,13 @@ class Cache:
                             r, template, pointer = self.solve_member(data, r, comp, template)
                             if pointer > 0:
                                 pointer -= 1
-                            if comp is None or comp.kind.is_invalid():
+                            if comp == None or comp.kind.is_invalid():
                                 ret = []
                         elif match.group(2) == "[]":
                             # TODO: different index types?
                             comp = r.get_member("operator[]", True)
                             r, template, pointer = self.solve_member(data, r, comp, template)
-                            if comp is None or comp.kind.is_invalid():
+                            if comp == None or comp.kind.is_invalid():
                                 ret = []
                     elif match.group(1) == None and pointer > 0:
                         if (nextm2 == "->" or nextm2 == "[]"):
@@ -549,7 +539,7 @@ class Cache:
                             function = True
                         member = r.get_member(member, function)
                         r, template, pointer = self.solve_member(data, r, member, template)
-                        if r is None and not member is None:
+                        if r == None and member != None:
                             # This can't be completed as a cursor object isn't returned
                             # from this member
                             ret = []
@@ -557,7 +547,7 @@ class Cache:
                             tocomplete = match.group(2) + tocomplete
                     m2 = nextm2
 
-                if not r is None and not r.kind.is_invalid() and (pointer == 0 or r.kind == cindex.CursorKind.OBJC_INTERFACE_DECL):
+                if r != None and not r.kind.is_invalid() and (pointer == 0 or r.kind == cindex.CursorKind.OBJC_INTERFACE_DECL):
                     clazz = extract_class_from_function(data)
                     if clazz == None:
                         clazz = extract_class(data)
@@ -616,7 +606,6 @@ class Cache:
                                         ins = re.sub(r[0], r[1], ins)
                                     add = (disp, ins)
                                     ret.append(add)
-                        cache_disposeCompletionResults(comp)
             ret = self.filter(ret)
             return remove_duplicates(ret)
         else:
@@ -624,7 +613,6 @@ class Cache:
             cached_results = cache_complete_startswith(self.cache, prefix)
             if cached_results:
                 ret = [(x.display, x.insert) for x in cached_results[0]]
-                cache_disposeCompletionResults(cached_results)
             variables = extract_variables(data) if not constr else []
             var = [("%s\t%s" % (v[1], re.sub(r"(^|\b)\s*static\s+", "", v[0])), v[1]) for v in variables]
             if len(var) and ret == None:
@@ -637,7 +625,7 @@ class Cache:
                 clazz = extract_class(data)
             if clazz != None:
                 c = self.find_type(data, clazz)
-                if not c is None and not c.kind.is_invalid():
+                if c != None and not c.kind.is_invalid():
                     comp = cache_completeCursor(self.cache, c)
                     if comp:
                         for c in comp[0]:
@@ -645,7 +633,6 @@ class Cache:
                                     not (c.baseclass and c.access == cindex.CXXAccessSpecifier.PRIVATE):
                                 add = (c.display, c.insert)
                                 ret.append(add)
-                        cache_disposeCompletionResults(comp)
             namespaces = extract_used_namespaces(data)
             ns = extract_namespace(data)
             if ns:
@@ -673,7 +660,6 @@ class Cache:
 
         if comp:
             ret = [(c.display, c.insert) for c in comp[0]]
-            cache_disposeCompletionResults(comp)
         return ret
 
 def format_cursor(cursor):
@@ -682,7 +668,7 @@ def format_cursor(cursor):
 
 def get_cursor_spelling(cursor):
     cursor_spelling = None
-    if not cursor is None:
+    if cursor != None:
         cursor_spelling = cursor.spelling or cursor.displayname
         cursor_spelling = re.sub(r"^(enum\s+|(class|struct)\s+(\w+::)*)", "", cursor_spelling)
     return cursor_spelling
@@ -844,9 +830,9 @@ class ExtensiveSearch:
                                         tu2.var, cand[0],
                                         cand[1],
                                         cand[2])
-                                if not cursor2 is None:
+                                if cursor2 != None:
                                     d = cursor2.get_canonical_cursor()
-                                    if not d is None and cursor2 != d:
+                                    if d != None and cursor2 != d:
                                         if format_cursor(d) == self.cursor:
                                             self.target = format_cursor(cursor2)
                                             run_in_main_thread(self.done)
@@ -861,20 +847,6 @@ class ExtensiveSearch:
         except:
             import traceback
             traceback.print_exc()
-
-    def get_possible_targets():
-        if len(es.target) > 0:
-            return self.target
-        elif not self.candidates.empty():
-            display = []
-            while not self.candidates.empty():
-                name, function, line, column = self.candidates.get()
-                pos = "%s:%d:%d" % (name, line, column)
-                display.append([function, pos])
-                self.candidates.task_done()
-            return display
-        else:
-            return None
 
 
 class LockedTranslationUnit(LockedVariable):
@@ -893,6 +865,11 @@ class LockedTranslationUnit(LockedVariable):
                                        row, col)
         cursor_spelling = get_cursor_spelling(cursor)
         word_under_cursor = extract_word_at_offset(data, offset)
+        if word_under_cursor == "" and cursor != None:
+            # Allow a parenthesis, brackets and some other non-name characters right after the name
+            match = re.search(r"(\w+)[\(\[\&\+\-\*\/]*$", extract_line_until_offset(data, offset))
+            if match:
+                word_under_cursor = match.group(1)
         return cursor, cursor_spelling, word_under_cursor
 
     def get_implementation(self, data, offset, found_callback, folders):
@@ -904,31 +881,31 @@ class LockedTranslationUnit(LockedVariable):
             if len(word_under_cursor) == 0:
                 found_callback(None)
                 return
-            if cursor is None or cursor.kind.is_invalid() or cursor_spelling != word_under_cursor:
-                if cursor is None or cursor.kind.is_invalid():
+            if cursor == None or cursor.kind.is_invalid() or cursor_spelling != word_under_cursor:
+                if cursor == None or cursor.kind.is_invalid():
                     cursor = None
                 ExtensiveSearch(cursor, word_under_cursor, found_callback, folders, self.opts, self.opts_script)
                 return
             d = cursor.get_definition()
-            if not d is None and cursor != d:
+            if d != None and cursor != d:
                 target = format_cursor(d)
-            elif not d is None and cursor == d and \
+            elif d != None and cursor == d and \
                     (cursor.kind == cindex.CursorKind.VAR_DECL or \
                     cursor.kind == cindex.CursorKind.PARM_DECL or \
                     cursor.kind == cindex.CursorKind.FIELD_DECL):
                 for child in cursor.get_children():
                     if child.kind == cindex.CursorKind.TYPE_REF:
                         d = child.get_definition()
-                        if not d is None:
+                        if d != None:
                             target = format_cursor(d)
                         break
             elif cursor.kind == cindex.CursorKind.CLASS_DECL:
                 for child in cursor.get_children():
                     if child.kind == cindex.CursorKind.CXX_BASE_SPECIFIER:
                         d = child.get_definition()
-                        if not d is None:
+                        if d != None:
                             target = format_cursor(d)
-            elif d is None:
+            elif d == None:
                 if cursor.kind == cindex.CursorKind.DECL_REF_EXPR or \
                         cursor.kind == cindex.CursorKind.MEMBER_REF_EXPR or \
                         cursor.kind == cindex.CursorKind.CALL_EXPR:
@@ -953,9 +930,9 @@ class LockedTranslationUnit(LockedVariable):
                                             tu2.var, cursor.location.file.name,
                                             cursor.location.line,
                                             cursor.location.column)
-                                    if not cursor2 is None:
+                                    if cursor2 != None:
                                         d = cursor2.get_definition()
-                                        if not d is None and cursor2 != d:
+                                        if d != None and cursor2 != d:
                                             target = format_cursor(d)
                                             break
                                 finally:
@@ -978,74 +955,10 @@ class LockedTranslationUnit(LockedVariable):
             if len(word_under_cursor) == 0:
                 found_callback(None)
                 return
-            if cursor is None or cursor.kind.is_invalid() or (cursor_spelling != word_under_cursor and cursor.kind != cindex.CursorKind.INCLUSION_DIRECTIVE):
-                # Try to determine what we're supposed to be looking for
-                line, col = get_line_and_column_from_offset(data, offset)
-
-                data = data[:get_offset_from_line_and_column(data, line+1, 0)]
-                chars = r"[\[\]\(\)&|.+-/*,<>;]"
-
-                word = [0,0]
-                off = len(data)
-                while True:
-                    off = data[:off].rfind(word_under_cursor)
-                    word = [off, off+len(word_under_cursor)]
-                    if offset >= off and offset <= off+len(word_under_cursor):
-                        break
-                for match in re.finditer(r"(^|\w+|=|%s|\s)\s*(%s)\s*($|==|%s)" % (chars, word_under_cursor, chars), data):
-                    if (match.start(2), match.end(2)) == (word[0], word[1]):
-                        if match.group(3) == "(":
-                            # Probably a function
-                            ExtensiveSearch(None, word_under_cursor, found_callback, folders, self.opts, self.opts_script, impl=False)
-                            return
-                        else:
-                            # A variable perhaps?
-                            data = data[:match.end(2)] + "."
-                            typedef = get_type_definition(data)
-                            if typedef:
-                                line, column, name, var, extra = typedef
-                                if line > 0 and column > 0:
-                                    found_callback("%s:%d:%d" % (self.fn, line, column))
-                                    return
-                                elif name != None and name == get_base_type(name):
-                                    search_re = re.compile(r"(^|\s|\})\s*(class|struct)(\s+%s\s*)(;|\{)" % name)
-                                    ExtensiveSearch(None, name, found_callback, folders, self.opts, self.opts_script, impl=False, search_re=search_re)
-                                    return
-                        break
-                found_callback(None)
-                return
             ref = cursor.get_reference()
             target = None
 
-            if not ref is None and cursor == ref:
-                can = cursor.get_canonical_cursor()
-                if not can is None and can != cursor:
-                    target = format_cursor(can)
-                else:
-                    o = cursor.get_overridden()
-                    if len(o) == 1:
-                        target = format_cursor(o[0])
-                    elif len(o) > 1:
-                        opts = []
-                        for i in range(len(o)):
-                            opts.append(self.quickpanel_format(o[i]))
-                        target = opts
-                    elif (cursor.kind == cindex.CursorKind.VAR_DECL or \
-                            cursor.kind == cindex.CursorKind.PARM_DECL or \
-                            cursor.kind == cindex.CursorKind.FIELD_DECL):
-                        for child in cursor.get_children():
-                            if child.kind == cindex.CursorKind.TYPE_REF:
-                                d = child.get_definition()
-                                if not d is None:
-                                    target = format_cursor(d)
-                                break
-                    elif cursor.kind == cindex.CursorKind.CLASS_DECL:
-                        for child in cursor.get_children():
-                            if child.kind == cindex.CursorKind.CXX_BASE_SPECIFIER:
-                                d = child.get_definition()
-                                if not d is None:
-                                    target = format_cursor(d)
-            elif not ref is None:
+            if ref != None:
                 target = format_cursor(ref)
             elif cursor.kind == cindex.CursorKind.INCLUSION_DIRECTIVE:
                 f = cursor.get_included_file()
@@ -1140,7 +1053,7 @@ class TranslationUnitCache(Worker):
             finally:
                 self.parsingList.unlock()
                 self.remove_busy(filename)
-        if not on_done is None:
+        if on_done != None:
             run_in_main_thread(on_done)
 
     def task_reparse(self, data):
@@ -1165,7 +1078,7 @@ class TranslationUnitCache(Worker):
             finally:
                 self.parsingList.unlock()
                 self.remove_busy(filename)
-        if not on_done is None:
+        if on_done != None:
             run_in_main_thread(on_done)
 
     def task_clear(self, data):
@@ -1256,6 +1169,8 @@ class TranslationUnitCache(Worker):
             if opts != cache[key][0]:
                 view.settings().clear_on_change("sublimeclang.opts")
                 del cache[key]
+        except KeyError:
+            view.settings().clear_on_change("sublimeclang.opts")
         finally:
             self.__options_cache.unlock()
 

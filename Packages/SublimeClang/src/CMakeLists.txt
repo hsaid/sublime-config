@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+include(CheckCXXSourceCompiles)
+
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 set(CMAKE_CXX_FLAGS "-g -Wall")
 else()
@@ -39,17 +41,49 @@ if(NOT DEFINED PARALLEL_COMPILES)
     set(PARALLEL_COMPILES 4)
 endif()
 
+macro(figure_out_cxx11_flags)
+    set(SOURCE "#include <tr1/memory>\nint main(int argc, char** argv) { std::tr1::shared_ptr<int> sp; return 0;}")
+    check_cxx_source_compiles("${SOURCE}" TR1_MEMORY)
+    if(${TR1_MEMORY})
+        set(CX11FLAGS "-DSUBLIMECLANG_USE_TR1")
+    else()
+        set(SOURCE "#include <memory>\nint main(int argc, char** argv) { std::shared_ptr<int> sp; return 0;}")
+        set(options "\;" "-std=c++11\;" "-std=c++11 -stdlib=libc++\;c++" "-std=gnu++11\;")
+        list(LENGTH options options_len)
+        math(EXPR options_len ${options_len}-1)
+        foreach(var RANGE 0 ${options_len})
+            list(GET options ${var} flags)
+            list(GET flags 0 option)
+            set(CMAKE_REQUIRED_FLAGS ${option})
+            set(test_var HAVE_STD_SHARED_PTR${var})
+            check_cxx_source_compiles("${SOURCE}" ${test_var})
+            if(${${test_var}})
+                list(GET flags 0 CX11FLAGS)
+                list(GET flags 1 CX11LIBS)
+                break()
+            endif()
+        endforeach(var)
+        if(NOT DEFINED CX11FLAGS)
+            unset(CMAKE_REQUIRED_FLAGS)
+            find_package(Boost REQUIRED)
+            include_directories(${Boost_INCLUDE_DIR}/boost/tr1/tr1)
+        endif()
+    endif()
+endmacro()
+
 if(NOT DEFINED WIN_RELEASE)
+    figure_out_cxx11_flags()
     file(READ "${PROJECT_SOURCE_DIR}/../package.json" TEMP)
     string(REGEX MATCH "(\"version\": \")([0-9]+\\.[0-9]+\\.[0-9]+)" TEMP ${TEMP})
     set(SUBLIMECLANG_VERSION ${CMAKE_MATCH_2})
-    add_definitions(-DSUBLIMECLANG_VERSION="${CMAKE_MATCH_2}")
+    add_definitions(-DSUBLIMECLANG_VERSION="${CMAKE_MATCH_2}" ${CX11FLAGS})
     set(TARGETLIB ${LIBPREFIX}cache${LIBSUFFIX})
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/..)
     link_directories(${PROJECT_SOURCE_DIR}/.. /usr/local/lib /usr/lib /usr/lib64/llvm)
     add_library(${TARGETLIB} SHARED main.cpp )
     target_link_libraries(
         ${TARGETLIB}
+        ${CX11LIBS}
         ${LIBPREFIX}clang${LIBSUFFIX}
     )
 endif()
@@ -183,6 +217,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
                         COMMAND find . -name \"*.cache\" -exec rm -rf {} +
                         COMMAND find . -name \"*.sublime-workspace\" -exec rm -rf {} +
                         COMMAND find . -name \"lib*.so\" -exec rm -rf {} +
+                        COMMAND find . -name \"*,cover\" -exec rm -rf {} +
+                        COMMAND find . -name \".coverage\" -exec rm -rf {} +
                         DEPENDS ${TARGETLIB} ${PROJECT_BINARY_DIR}/release clean_release
                         DEPENDS ${PROJECT_SOURCE_DIR}/../libclang.dll ${PROJECT_SOURCE_DIR}/../libcache.dll
                         DEPENDS ${PROJECT_SOURCE_DIR}/../libclang_x64.dll ${PROJECT_SOURCE_DIR}/../libcache_x64.dll
@@ -205,13 +241,17 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 if(DEFINED WIN_RELEASE)
-    if(NOT EXISTS ./SublimeClang.sublime-package)
+    file(DOWNLOAD https://raw.github.com/quarnster/SublimeClang/master/package.json ${PROJECT_BINARY_DIR}/current.json LOG log)
+    file(READ "${PROJECT_BINARY_DIR}/current.json" TEMP)
+    string(REGEX MATCH "\"url\": \"(.*/(.*))\"" TEMP ${TEMP})
+
+    if(NOT EXISTS ${PROJECT_BINARY_DIR}/${CMAKE_MATCH_2})
         message("Downloading current SublimeClang release...")
-        file(DOWNLOAD http://cloud.github.com/downloads/quarnster/SublimeClang/SublimeClang.sublime-package ./SublimeClang.sublime-package)
+        file(DOWNLOAD ${CMAKE_MATCH_1} ${PROJECT_BINARY_DIR}/${CMAKE_MATCH_2})
     endif()
     add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/source
         COMMAND ${CMAKE_COMMAND} -E make_directory source
-        COMMAND ${CMAKE_COMMAND} -E chdir source ${CMAKE_COMMAND} -E tar xf ../SublimeClang.sublime-package
+        COMMAND ${CMAKE_COMMAND} -E chdir source ${CMAKE_COMMAND} -E tar xf ${PROJECT_BINARY_DIR}/${CMAKE_MATCH_2}
         COMMAND ${CMAKE_COMMAND} -E copy_if_different source/libclang.dll ${PROJECT_SOURCE_DIR}/../libclang.dll
         COMMAND ${CMAKE_COMMAND} -E copy_if_different source/libclang_x64.dll ${PROJECT_SOURCE_DIR}/../libclang_x64.dll
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}

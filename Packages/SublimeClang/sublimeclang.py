@@ -44,7 +44,7 @@ from common import get_setting, get_settings, is_supported_language, get_languag
 import translationunitcache
 from parsehelp import parsehelp
 import Queue
-
+import traceback
 
 def warm_up_cache(view, filename=None):
     if filename == None:
@@ -242,7 +242,11 @@ def display_compilation_results(view):
         errorCount = 0
         warningCount = 0
         ignoreDirs = [os.path.abspath(os.path.normpath(os.path.normcase(d))) for d in get_setting("diagnostic_ignore_dirs", [], view)]
-        ignore_regex = re.compile(get_setting("diagnostic_ignore_regex", "pragma once in main file"))
+        ignore_regex_str = get_setting("diagnostic_ignore_regex", "pragma once in main file")
+        if ignore_regex_str:
+            ignore_regex = re.compile(ignore_regex_str)
+        else:
+            ignore_regex = None
 
         if len(tu.var.diagnostics):
             errString = ""
@@ -259,7 +263,7 @@ def display_compilation_results(view):
                                               diag.severityName,
                                               diag.spelling)
 
-                if ignore_regex.search(err):
+                if ignore_regex and ignore_regex.search(err):
                     continue
 
                 try:
@@ -285,7 +289,7 @@ def display_compilation_results(view):
                 """
                 add_error_mark(
                     diag.severityName, filename, f.line - 1, diag.spelling)
-            show = get_setting("show_output_panel", True, view)
+            show = errString and get_setting("show_output_panel", True, view)
     finally:
         tu.unlock()
     if (errorCount > 0 or warningCount > 0) and get_setting("show_status", True, view):
@@ -403,7 +407,10 @@ class SublimeClangAutoComplete(sublime_plugin.EventListener):
             cached_results = None
             if clang_fast_completions and get_setting("enable_fast_completions", True, view):
                 data = view.substr(sublime.Region(0, locations[0]))
-                cached_results = tu.cache.complete(data, prefix)
+                try:
+                    cached_results = tu.cache.complete(data, prefix)
+                except:
+                    traceback.print_exc()
             if cached_results != None:
                 print "found fast completions"
                 ret = cached_results

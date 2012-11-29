@@ -17,6 +17,13 @@ ST2 offers three types of completions itself:
     * ``suppress_word_completions``
     * ``suppress_explicit_completions``
 
+Case-Insensitive Completions
+==================
+
+Some users prefer to get more completion proposals by ignoring case of what they type and what Rope has indexed.
+By settings ``case_sensitive_completion`` to false you can enable this behavior.
+For example, when typing "inde" SublimeRope will offer "IndexError".
+
 Manual Completions
 ==================
 
@@ -31,7 +38,7 @@ SublimeRope provides completion suggestions based on the rope library, but also 
 
 You can enable it setting ``use_simple_completion`` to true in SublimeRope settings file.
 
-Howto get autocompletion on dot typing?
+How to get autocompletion on dot typing?
 ===========================================
 
 Some users want SublimeRope shown the completions just after typing the dot in for example  ``os.``, ST2 gives us a simple way to setup this desirable behavior.

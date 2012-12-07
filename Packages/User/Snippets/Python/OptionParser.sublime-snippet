@@ -9,6 +9,8 @@ parser.add_option("-u", "--user", dest = "user", default = "$3",
 				  help = "Database user.")
 parser.add_option("-p", "--password", dest = "password", default = $4,
 				  help = "Database password.")
+parser.add_option("", "--port", dest = "port", default = ${5:5432},
+				  help = "Database port.")
 $0
 options, args = parser.parse_args(sys.argv[1:])
 ]]></content>

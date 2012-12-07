@@ -2,8 +2,7 @@
 	<content><![CDATA[
 #!/usr/bin/env leds_python
 
-from zt.ver3 import db, zutil
-from pyztoolkit import profile, link, alert, grid_to_table, zrecord, indent, grayText
+from zt import db, dbob, zutil
 
 $0
 ]]></content>

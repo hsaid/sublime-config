@@ -1,8 +1,8 @@
 <snippet>
 	<content><![CDATA[
-SELECT pg_terminate_backend(procpid)
+SELECT pg_terminate_backend(${1:pid})
 FROM pg_stat_activity
-WHERE datname ILIKE '$1';
+WHERE datname ILIKE '$2';
 ]]></content>
 	<tabTrigger>kill-connections</tabTrigger>
 	<scope>source.sql</scope>

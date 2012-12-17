@@ -16,5 +16,9 @@
 	"phoenix_solid_current_tab": true,
 	"phoenix_tabs_small": true,
 	"sublimelinter": true,
-	"theme": "Phoenix Dark.sublime-theme"
+	"theme": "Phoenix Dark.sublime-theme",
+	"detect_indentation": false,
+	"tab_size": 4,
+	"translate_tabs_to_spaces": false,
+	"use_tab_stops": true
 }

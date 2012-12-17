@@ -314,7 +314,7 @@ def display_compilation_results(view):
             if clang_error_panel.is_visible():
                 window.run_command("clang_toggle_panel", {"show": False})
 
-member_regex = re.compile("(([a-zA-Z_]+[0-9_]*)|([\)\]])+)((\.)|(->))$")
+member_regex = re.compile(r"(([a-zA-Z_]+[0-9_]*)|([\)\]])+)((\.)|(->))$")
 
 
 def is_member_completion(view, caret):
@@ -470,7 +470,7 @@ class SublimeClangAutoComplete(sublime_plugin.EventListener):
     def recompile(self):
         view = self.view
         unsaved_files = []
-        if view.is_dirty():
+        if view.is_dirty() and get_setting("reparse_use_dirty_buffer", False, view):
             unsaved_files.append((view.file_name().encode("utf-8"),
                                   view.substr(Region(0, view.size()))))
         if not translationunitcache.tuCache.reparse(view, view.file_name().encode("utf-8"), unsaved_files,

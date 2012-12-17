@@ -364,13 +364,15 @@ class Cache:
 
                         for c in comp[0]:
                             if (selfcompletion and not c.baseclass) or \
-                                (inherits and not c.access == cindex.CXXAccessSpecifier.PRIVATE) or \
-                                    (c.access == cindex.CXXAccessSpecifier.PUBLIC and c.static) or \
-                                    c.cursor.kind == cindex.CursorKind.TYPEDEF_DECL or \
-                                    c.cursor.kind == cindex.CursorKind.CLASS_DECL or \
-                                    c.cursor.kind == cindex.CursorKind.STRUCT_DECL or \
-                                    c.cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL or \
-                                    c.cursor.kind == cindex.CursorKind.ENUM_DECL:
+                                    (inherits and not c.access == cindex.CXXAccessSpecifier.PRIVATE) or \
+                                    (c.access == cindex.CXXAccessSpecifier.PUBLIC and \
+                                     (
+                                        c.static or \
+                                        c.cursor.kind == cindex.CursorKind.TYPEDEF_DECL or \
+                                        c.cursor.kind == cindex.CursorKind.CLASS_DECL or \
+                                        c.cursor.kind == cindex.CursorKind.STRUCT_DECL or \
+                                        c.cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL or \
+                                        c.cursor.kind == cindex.CursorKind.ENUM_DECL)):
                                 ret.append((c.display, c.insert))
             ret = self.filter(ret, constr)
             return ret
@@ -689,10 +691,10 @@ class ExtensiveSearch:
     def __init__(self, cursor, spelling, found_callback, folders, opts, opts_script, name="", impl=True, search_re=None, file_re=None):
         self.name = name
         if impl:
-            self.re = re.compile(r"(\w+\s+|\w+::|\*|&)(%s\s*\([^;\{]*\))\s*\{" % re.escape(spelling))
+            self.re = re.compile(r"\w+[\*&\s]+(?:\w+::)?(%s\s*\([^;\{]*\))(?=\s*\{)" % re.escape(spelling))
             self.impre = re.compile(r"(\.cpp|\.c|\.cc|\.m|\.mm)$")
         else:
-            self.re = re.compile(r"(\w+\s+|\w+::|\*|&)(%s\s*\([^;\{}]*\))\s*;" % re.escape(spelling))
+            self.re = re.compile(r"\w+[\*&\s]+(?:\w+::)?(%s\s*\([^;\{]*\))(?=\s*;)" % re.escape(spelling))
             self.impre = re.compile(r"(\.h|\.hpp)$")
         if search_re != None:
             self.re = search_re
@@ -811,14 +813,14 @@ class ExtensiveSearch:
                 for match in self.re.finditer(data):
                     fine_search = True
                     loc = match.start()
-                    for i in range(len(match.groups())):
+                    for i in range(len(match.groups())+1):
                         m = match.group(i)
                         if self.spelling in m:
                             loc = match.start(i)
 
                     line, column = get_line_and_column_from_offset(data, loc)
                     fine_cands.append((name, line, column))
-                    self.candidates.put((name, "".join(match.groups()), line, column))
+                    self.candidates.put((name, match.group(0), line, column))
 
                 if fine_search and self.cursor and self.impl:
                     tu2 = tuCache.get_translation_unit(name, self.opts, self.opts_script)
@@ -937,9 +939,9 @@ class LockedTranslationUnit(LockedVariable):
                                             break
                                 finally:
                                     tu2.unlock()
-                        if not target:
-                            ExtensiveSearch(cursor, word_under_cursor, found_callback, folders, self.opts, self.opts_script)
-                            return
+                    if not target:
+                        ExtensiveSearch(cursor, word_under_cursor, found_callback, folders, self.opts, self.opts_script)
+                        return
             else:
                 target = format_cursor(d)
         finally:

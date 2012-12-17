@@ -3,6 +3,7 @@ Settings/
 Backup/
 *.cache
 
+Sublime Text 2.sublime-workspace
 Packages/User/SublimeREPLHistory
 Packages/SublimeLinter/sublimelinter/.tempfiles
 

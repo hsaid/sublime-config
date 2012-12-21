@@ -6,7 +6,6 @@
 import sys, os, re
 from reporter import *
 from leds_style import *
-from zt.ver3 import db
 # ==============================================================================
 
 title = "${1:Title}"

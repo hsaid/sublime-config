@@ -4,3 +4,4 @@ My Sublime Text 2 configuration. It primarily contains [C++ and Python snippets]
 ###Goals/Todo
 * ~~Get SublimeRope working performantly.~~
 * Get SublimeClang working performantly.
+* Stop committing modules controlled by Package Control.

@@ -1,0 +1,62 @@
+<snippet>
+	<content><![CDATA[
+#ifndef $1_H
+#define $1_H
+
+#include "listviewscreen.h"
+
+class $2 : public ListviewScreen
+{
+	Q_OBJECT
+
+public:
+	$2(QWidget* parent = 0, const char* name = 0, WFlags f = 0);
+	virtual ~$2();
+
+protected:
+	virtual bool newItem();
+	virtual bool editItem(const QString& $5id);
+	virtual bool allowRemoveItem(const QString& $5id);
+};
+
+#endif$0	
+#include "$3.h"
+
+#include <initializer.h>
+
+//==============================================================================
+$2::$2(QWidget* parent, const char* name, WFlags f)
+	: ListviewScreen("${4:Singular Title}", "${5:table}", parent, name, f)
+{
+	QStringList titles;
+	QStringList column_sort_params;
+	QString sql;
+
+	ListviewScreen::setListviewAttributes(titles, column_sort_params, sql);
+}
+
+//==============================================================================
+$2::~$2()
+{}
+
+//==============================================================================
+bool $2::newItem()
+{
+	
+}
+
+//==============================================================================
+bool $2::editItem(const QString& $5id)
+{
+	
+}
+
+//==============================================================================
+bool $2::allowRemoveItem(const QString& $5id)
+{
+	
+}
+]]></content>
+	<tabTrigger>listviewscreen</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

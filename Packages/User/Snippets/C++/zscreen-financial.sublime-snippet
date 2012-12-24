@@ -54,7 +54,7 @@ $3::~$3()
 //==============================================================================
 void $3::fillMenuPane(ZTaskPane* menuPane)
 {
-	menuPane->addCategory(QStringList() << "Menu" << _current_financial_fund_name);
+	menuPane->addCategory(QStringList() << "Menu" << "Fund: " + _current_financial_fund_name);
 }
 
 //==============================================================================

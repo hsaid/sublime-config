@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-db_args = db.parse_connection_args(host="$1", database="$2", user="$3", password=$4, port="$5")
+db_args = db.parse_connection_args(database=${1:options.database}, user=${2:options.user}, password=${3:options.password}, port=${4:options.port})
 db.psycopgconnect(**db_args)
 ]]></content>
 	<tabTrigger>dbconnect</tabTrigger>

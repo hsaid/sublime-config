@@ -53,7 +53,7 @@
     "use_tab_stops": true,
 
     // Set to false to disable detection of tabs vs. spaces on load
-    "detect_indentation": true,
+    "detect_indentation": false,
 
     // Calculates indentation automatically when pressing enter
     "auto_indent": true,
@@ -253,7 +253,7 @@
     "tree_animation_enabled": true,
 
     // Makes tabs with modified files more visible
-    "highlight_modified_tabs": false,
+    "highlight_modified_tabs": true,
 
     "show_tab_close_buttons": true,
 
@@ -265,7 +265,7 @@
     "use_simple_full_screen": false,
 
     // Valid values are "system", "enabled" and "disabled"
-    "overlay_scroll_bars": "system",
+    "overlay_scroll_bars": "enabled",
 
     //
     // Application Behavior Settings

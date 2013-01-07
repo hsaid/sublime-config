@@ -2,6 +2,7 @@
 Settings/
 Backup/
 *.cache
+*.last-run
 
 Sublime Text 2.sublime-workspace
 Packages/User/SublimeREPLHistory
@@ -42,4 +43,3 @@ nosetests.xml
 # Mr Developer
 .mr.developer.cfg
 .project
-.pydevproject

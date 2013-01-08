@@ -1,13 +1,13 @@
 <snippet>
 	<content><![CDATA[
 SELECT 	datname,
-		procpid,
+		pid,
 		application_name,
 		current_timestamp-xact_start AS xact_age,
 		current_timestamp-query_start AS qry_age,
-		current_query 
+		query 
 FROM pg_stat_activity 
-WHERE current_query!='<IDLE>' 
+WHERE query!='<IDLE>' 
 ORDER BY xact_start;
 ]]></content>
 	<tabTrigger>current-activity</tabTrigger>

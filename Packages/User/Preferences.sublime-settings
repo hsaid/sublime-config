@@ -6,6 +6,7 @@
 	[
 		"SublimeClang",
 		"Vintage",
+		"SublimeRope",
 		"SublimeLinter"
 	],
 	"overlay_scroll_bars": "enabled",

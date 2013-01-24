@@ -6,9 +6,11 @@
 		"Format SQL",
 		"Package Control",
 		"SublimeClang",
+		"SublimeCodeIntel",
 		"SublimeLinter",
 		"SublimeREPL",
 		"SublimeRope",
+		"Terminal",
 		"Theme - Phoenix",
 		"Tortoise"
 	]

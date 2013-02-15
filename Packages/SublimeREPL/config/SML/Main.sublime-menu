@@ -9,15 +9,15 @@
             "children":
             [
                 {"command": "repl_open",
-                "id": "repl_clisp",
-                 "caption": "Clisp",
+                 "caption": "SML",
+                 "id": "repl_sml",
                  "args": {
                     "type": "subprocess",
                     "encoding": "utf8",
-                    "cmd": ["clisp", "-disable-readline"],
+                    "cmd": ["sml"],
                     "cwd": "$file_path",
-                    "syntax": "Packages/Lisp/Lisp.tmLanguage",
-                    "external_id": "lisp"
+                    "external_id": "sml",
+                    "syntax": "Packages/SML/SML.tmLanguage"
                     }
                 }
             ]

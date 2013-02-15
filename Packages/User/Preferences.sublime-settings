@@ -1,12 +1,17 @@
 {
+	"auto_complete_commit_on_tab": true,
+	"caret_style": "smooth",
 	"color_scheme": "Packages/Color Scheme - Default/Base16 Dark.tmTheme",
 	"detect_indentation": false,
+	"detect_slow_plugins": false,
+	"fallback_encoding": "UTF-8",
+	"font_size": 8,
+	"highlight_line": true,
 	"highlight_modified_tabs": true,
 	"ignored_packages":
 	[
 		"SublimeClang",
 		"Vintage",
-		"SublimeRope",
 		"SublimeLinter"
 	],
 	"overlay_scroll_bars": "enabled",

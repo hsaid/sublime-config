@@ -1,0 +1,9 @@
+<snippet>
+	<content><![CDATA[
+QVBoxLayout* layout = new QVBoxLayout(${1:frm}, 0, 6);
+${2:var} = new $3($4);
+layout->addWidget(${2:var});
+]]></content>
+	<tabTrigger>addCustomWidget</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>

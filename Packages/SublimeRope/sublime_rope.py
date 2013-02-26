@@ -11,6 +11,7 @@ import threading
 
 import rope
 import ropemate
+from utils import get_setting
 from rope.base.ast import parse
 from rope.base.exceptions import ModuleSyntaxError
 from rope.base.pycore import ModuleNotFoundError
@@ -34,17 +35,6 @@ try:
 except ImportError:
     # use our bundled version
     import rope_pyflakes.checker as pyflakes
-
-
-def get_setting(key, default_value=None):
-    try:
-        settings = sublime.active_window().active_view().settings()
-        if settings.has('rope_{0}'.format(key)):
-            return settings.get('rope_{0}'.format(key))
-    except:
-        pass
-    s = sublime.load_settings('SublimeRope.sublime-settings')
-    return s.get(key, default_value)
 
 
 # Global Variable for storing errors found by PyFlask
@@ -234,7 +224,7 @@ class AutoImport(threading.Thread):
                 # check whether adding an import is necessary, and where
                 all_lines = self.view.lines(
                     sublime.Region(0, self.view.size()))
-                line_no = context.importer.find_insertion_line(context.input)
+                line_no = context.importer.find_insertion_line(context.input) - 1
                 insert_import_str = "from %s import %s\n" % (module, name)
                 existing_imports_str = self.view.substr(
                     sublime.Region(all_lines[0].a, all_lines[line_no - 1].b))
@@ -850,6 +840,7 @@ class PythonGenerateModulesCache(sublime_plugin.TextCommand):
             ctx = ropemate.context_for(self.view)
             ctx.building = True
             ctx.__enter__()
+            ctx.importer.class_methods = get_setting('include_classmethods_in_globals', False)
             thread = PythonGenerateModulesCache.GenerateModulesCache(
                 ctx, modules)
             thread.start()
@@ -878,6 +869,7 @@ class PythonRegenerateCache(sublime_plugin.TextCommand):
         ctx.building = True
         # we have to enter on main, but build on worker thread
         ctx.__enter__()
+        ctx.importer.class_methods = get_setting('include_classmethods_in_globals', False)
         thread = PythonRegenerateCache.RegenerateCacheThread(ctx)
         thread.start()
 
